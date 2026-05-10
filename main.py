@@ -12,6 +12,7 @@ FOOD_COUNT = 40
 
 AGENT_RADIUS = 5
 FOOD_RADIUS = 3
+EAT_DISTANCE = 8
 
 BACKGROUND_COLOR = (20, 20, 20)
 AGENT_COLOR = (0, 255, 100)
@@ -27,6 +28,13 @@ def random_velocity():
     return random.choice([-2, -1, 1, 2])
 
 
+def create_food():
+    return {
+        "x": random.randint(FOOD_RADIUS, WIDTH - FOOD_RADIUS),
+        "y": random.randint(FOOD_RADIUS, HEIGHT - FOOD_RADIUS)
+    }
+
+
 agents = []
 
 for _ in range(AGENT_COUNT):
@@ -34,17 +42,15 @@ for _ in range(AGENT_COUNT):
         "x": random.randint(AGENT_RADIUS, WIDTH - AGENT_RADIUS),
         "y": random.randint(AGENT_RADIUS, HEIGHT - AGENT_RADIUS),
         "dx": random_velocity(),
-        "dy": random_velocity()
+        "dy": random_velocity(),
+        "food_eaten": 0
     })
 
 
 foods = []
 
 for _ in range(FOOD_COUNT):
-    foods.append({
-        "x": random.randint(FOOD_RADIUS, WIDTH - FOOD_RADIUS),
-        "y": random.randint(FOOD_RADIUS, HEIGHT - FOOD_RADIUS)
-    })
+    foods.append(create_food())
 
 
 running = True
@@ -57,7 +63,6 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    # DRAW FOOD
     for food in foods:
         pygame.draw.circle(
             screen,
@@ -66,7 +71,6 @@ while running:
             FOOD_RADIUS
         )
 
-    # UPDATE AGENTS
     for agent in agents:
 
         agent["x"] += agent["dx"]
@@ -77,6 +81,14 @@ while running:
 
         if agent["y"] <= AGENT_RADIUS or agent["y"] >= HEIGHT - AGENT_RADIUS:
             agent["dy"] *= -1
+
+        for food in foods[:]:
+            distance = math.hypot(agent["x"] - food["x"], agent["y"] - food["y"])
+
+            if distance < EAT_DISTANCE:
+                foods.remove(food)
+                foods.append(create_food())
+                agent["food_eaten"] += 1
 
         pygame.draw.circle(
             screen,
