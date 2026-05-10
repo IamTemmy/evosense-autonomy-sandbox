@@ -42,6 +42,7 @@ font = pygame.font.SysFont("Arial", 18)
 
 births = 0
 deaths = 0
+hazard_enabled = True
 
 
 def random_velocity():
@@ -63,7 +64,7 @@ def create_food():
         x = random.randint(FOOD_RADIUS, WIDTH - FOOD_RADIUS)
         y = random.randint(FOOD_RADIUS, HEIGHT - FOOD_RADIUS)
 
-        if not HAZARD_ZONE.collidepoint(x, y):
+        if not hazard_enabled or not HAZARD_ZONE.collidepoint(x, y):
             return {"x": x, "y": y}
 
 
@@ -80,6 +81,15 @@ def create_agent(x=None, y=None):
     }
 
 
+def reset_simulation():
+    global agents, foods, births, deaths
+
+    agents = [create_agent() for _ in range(AGENT_COUNT)]
+    foods = [create_food() for _ in range(FOOD_COUNT)]
+    births = 0
+    deaths = 0
+
+
 def draw_stats():
     if agents:
         average_energy = sum(agent["energy"] for agent in agents) / len(agents)
@@ -92,8 +102,13 @@ def draw_stats():
         f"Average Energy: {average_energy:.1f}",
         f"Births: {births}",
         f"Deaths: {deaths}",
-        "Purple Zone: Hazard",
-        "Behavior: Seek food + mild hazard avoidance"
+        f"Hazard: {'ON' if hazard_enabled else 'OFF'}",
+        "",
+        "Controls:",
+        "R = Reset",
+        "H = Toggle hazard",
+        "F = Add food",
+        "G = Remove food"
     ]
 
     y = 10
@@ -104,19 +119,37 @@ def draw_stats():
         y += 22
 
 
-agents = [create_agent() for _ in range(AGENT_COUNT)]
-foods = [create_food() for _ in range(FOOD_COUNT)]
+agents = []
+foods = []
+reset_simulation()
 
 running = True
 
 while running:
 
     screen.fill(BACKGROUND_COLOR)
-    pygame.draw.rect(screen, HAZARD_COLOR, HAZARD_ZONE)
+
+    if hazard_enabled:
+        pygame.draw.rect(screen, HAZARD_COLOR, HAZARD_ZONE)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_r:
+                reset_simulation()
+
+            if event.key == pygame.K_h:
+                hazard_enabled = not hazard_enabled
+
+            if event.key == pygame.K_f:
+                for _ in range(5):
+                    foods.append(create_food())
+
+            if event.key == pygame.K_g:
+                for _ in range(min(5, len(foods))):
+                    foods.pop()
 
     for food in foods:
         pygame.draw.circle(
@@ -132,7 +165,7 @@ while running:
 
         agent_position = (int(agent["x"]), int(agent["y"]))
 
-        if HAZARD_ZONE.collidepoint(agent_position):
+        if hazard_enabled and HAZARD_ZONE.collidepoint(agent_position):
             agent["energy"] -= HAZARD_ENERGY_LOSS_RATE
         else:
             agent["energy"] -= ENERGY_LOSS_RATE
@@ -163,7 +196,7 @@ while running:
             if random.random() < 0.03:
                 agent["dx"], agent["dy"] = random_velocity()
 
-        if HAZARD_ZONE.collidepoint(agent_position):
+        if hazard_enabled and HAZARD_ZONE.collidepoint(agent_position):
             agent["dx"] *= 0.95
             agent["dy"] *= 0.95
 
