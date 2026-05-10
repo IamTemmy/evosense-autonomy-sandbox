@@ -1,6 +1,7 @@
 import pygame
 import random
 import math
+from collections import Counter
 
 pygame.init()
 
@@ -15,10 +16,6 @@ AGENT_RADIUS = 5
 FOOD_RADIUS = 3
 
 EAT_DISTANCE = 8
-
-BASE_SPEED = 2.0
-BASE_VISION_RADIUS = 120
-BASE_ENERGY_LOSS_RATE = 0.14
 
 STARTING_ENERGY = 100
 HAZARD_ENERGY_LOSS_RATE = 0.35
@@ -159,13 +156,20 @@ def reset_simulation():
     deaths = 0
 
 
+def get_lineage_stats():
+    if not agents:
+        return []
+
+    lineage_counts = Counter(agent["lineage_id"] for agent in agents)
+    return lineage_counts.most_common(3)
+
+
 def draw_stats():
     if agents:
         average_energy = sum(agent["energy"] for agent in agents) / len(agents)
         average_speed = sum(agent["speed"] for agent in agents) / len(agents)
         average_vision = sum(agent["vision_radius"] for agent in agents) / len(agents)
         average_energy_loss = sum(agent["energy_loss_rate"] for agent in agents) / len(agents)
-
         living_lineages = len(set(agent["lineage_id"] for agent in agents))
     else:
         average_energy = 0
@@ -188,12 +192,20 @@ def draw_stats():
         f"Avg Vision: {average_vision:.1f}",
         f"Avg Energy Loss: {average_energy_loss:.3f}",
         "",
+        "Top Lineages:"
+    ]
+
+    for lineage_id, count in get_lineage_stats():
+        stats.append(f"Lineage {lineage_id}: {count} agents")
+
+    stats.extend([
+        "",
         "Controls:",
         "R = Reset",
         "H = Toggle hazard",
         "F = Add food",
         "G = Remove food"
-    ]
+    ])
 
     y = 10
 
