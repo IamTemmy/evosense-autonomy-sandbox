@@ -9,6 +9,7 @@ pygame.init()
 
 WIDTH = 800
 HEIGHT = 600
+FPS = 60
 
 AGENT_COUNT = 20
 FOOD_COUNT = 18
@@ -149,6 +150,28 @@ def create_agent(x=None, y=None, parent=None):
     }
 
 
+def initialize_log_file():
+    os.makedirs("data", exist_ok=True)
+
+    with open(LOG_FILE, mode="w", newline="") as file:
+        writer = csv.writer(file)
+
+        writer.writerow([
+            "frame",
+            "time_seconds",
+            "population",
+            "food_count",
+            "births",
+            "deaths",
+            "average_energy",
+            "average_speed",
+            "average_vision",
+            "average_energy_loss",
+            "living_lineages",
+            "hazard_enabled"
+        ])
+
+
 def reset_simulation():
     global agents, foods, births, deaths, next_lineage_id, frame_count
 
@@ -180,27 +203,6 @@ def get_average_stats():
     }
 
 
-def initialize_log_file():
-    os.makedirs("data", exist_ok=True)
-
-    with open(LOG_FILE, mode="w", newline="") as file:
-        writer = csv.writer(file)
-
-        writer.writerow([
-            "frame",
-            "population",
-            "food_count",
-            "births",
-            "deaths",
-            "average_energy",
-            "average_speed",
-            "average_vision",
-            "average_energy_loss",
-            "living_lineages",
-            "hazard_enabled"
-        ])
-
-
 def log_simulation_data():
     stats = get_average_stats()
 
@@ -209,6 +211,7 @@ def log_simulation_data():
 
         writer.writerow([
             frame_count,
+            round(frame_count / FPS, 2),
             len(agents),
             len(foods),
             births,
@@ -254,6 +257,7 @@ def draw_stats():
         f"Deaths: {deaths}",
         f"Living Lineages: {stats_data['living_lineages']}",
         f"Hazard: {'ON' if hazard_enabled else 'OFF'}",
+        f"Time: {frame_count / FPS:.1f}s",
         f"Logging: {LOG_FILE}",
         "",
         "Traits:",
@@ -453,6 +457,6 @@ while running:
     draw_stats()
 
     pygame.display.flip()
-    clock.tick(60)
+    clock.tick(FPS)
 
 pygame.quit()

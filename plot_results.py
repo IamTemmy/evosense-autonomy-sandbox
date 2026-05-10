@@ -13,9 +13,9 @@ data = pd.read_csv(LOG_FILE)
 # Population Plot
 # -----------------------------
 plt.figure(figsize=(10, 5))
-plt.plot(data["frame"], data["population"])
+plt.plot(data["time_seconds"], data["population"])
 plt.title("Population Over Time")
-plt.xlabel("Frame")
+plt.xlabel("Time (seconds)")
 plt.ylabel("Population")
 plt.grid(True)
 
@@ -26,9 +26,9 @@ plt.close()
 # Energy Plot
 # -----------------------------
 plt.figure(figsize=(10, 5))
-plt.plot(data["frame"], data["average_energy"])
+plt.plot(data["time_seconds"], data["average_energy"])
 plt.title("Average Energy Over Time")
-plt.xlabel("Frame")
+plt.xlabel("Time (seconds)")
 plt.ylabel("Average Energy")
 plt.grid(True)
 
@@ -39,11 +39,11 @@ plt.close()
 # Births and Deaths Plot
 # -----------------------------
 plt.figure(figsize=(10, 5))
-plt.plot(data["frame"], data["births"], label="Births")
-plt.plot(data["frame"], data["deaths"], label="Deaths")
+plt.plot(data["time_seconds"], data["births"], label="Births")
+plt.plot(data["time_seconds"], data["deaths"], label="Deaths")
 
 plt.title("Births and Deaths Over Time")
-plt.xlabel("Frame")
+plt.xlabel("Time (seconds)")
 plt.ylabel("Count")
 plt.legend()
 plt.grid(True)
@@ -56,12 +56,12 @@ plt.close()
 # -----------------------------
 plt.figure(figsize=(10, 5))
 
-plt.plot(data["frame"], data["average_speed"], label="Speed")
-plt.plot(data["frame"], data["average_vision"], label="Vision Radius")
-plt.plot(data["frame"], data["average_energy_loss"], label="Energy Loss")
+plt.plot(data["time_seconds"], data["average_speed"], label="Speed")
+plt.plot(data["time_seconds"], data["average_vision"], label="Vision Radius")
+plt.plot(data["time_seconds"], data["average_energy_loss"], label="Energy Loss")
 
 plt.title("Trait Evolution Over Time")
-plt.xlabel("Frame")
+plt.xlabel("Time (seconds)")
 plt.ylabel("Trait Value")
 plt.legend()
 plt.grid(True)
