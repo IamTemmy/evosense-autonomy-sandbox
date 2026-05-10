@@ -16,6 +16,7 @@ FOOD_RADIUS = 3
 
 EAT_DISTANCE = 8
 VISION_RADIUS = 100
+HAZARD_AVOID_RADIUS = 80
 
 STARTING_ENERGY = 100
 ENERGY_LOSS_RATE = 0.14
@@ -76,7 +77,8 @@ def draw_stats():
         f"Average Energy: {average_energy:.1f}",
         f"Births: {births}",
         f"Deaths: {deaths}",
-        "Purple Zone: Hazard"
+        "Purple Zone: Hazard",
+        "Behavior: Seek food + avoid hazard"
     ]
 
     y = 10
@@ -85,6 +87,12 @@ def draw_stats():
         text_surface = font.render(stat, True, TEXT_COLOR)
         screen.blit(text_surface, (10, y))
         y += 22
+
+
+def closest_point_on_rect(rect, x, y):
+    closest_x = max(rect.left, min(x, rect.right))
+    closest_y = max(rect.top, min(y, rect.bottom))
+    return closest_x, closest_y
 
 
 agents = [create_agent() for _ in range(AGENT_COUNT)]
@@ -139,6 +147,9 @@ while running:
                 closest_distance = distance
                 closest_food = food
 
+        move_x = agent["dx"]
+        move_y = agent["dy"]
+
         if closest_food:
             direction_x = closest_food["x"] - agent["x"]
             direction_y = closest_food["y"] - agent["y"]
@@ -146,8 +157,38 @@ while running:
             magnitude = math.hypot(direction_x, direction_y)
 
             if magnitude != 0:
-                agent["dx"] = direction_x / magnitude * 2
-                agent["dy"] = direction_y / magnitude * 2
+                move_x = direction_x / magnitude * 2
+                move_y = direction_y / magnitude * 2
+
+        hazard_x, hazard_y = closest_point_on_rect(
+            HAZARD_ZONE,
+            agent["x"],
+            agent["y"]
+        )
+
+        hazard_distance = math.hypot(
+            agent["x"] - hazard_x,
+            agent["y"] - hazard_y
+        )
+
+        if hazard_distance < HAZARD_AVOID_RADIUS:
+            avoid_x = agent["x"] - hazard_x
+            avoid_y = agent["y"] - hazard_y
+
+            avoid_magnitude = math.hypot(avoid_x, avoid_y)
+
+            if avoid_magnitude != 0:
+                avoid_x = avoid_x / avoid_magnitude * 2.5
+                avoid_y = avoid_y / avoid_magnitude * 2.5
+
+                move_x += avoid_x
+                move_y += avoid_y
+
+        move_magnitude = math.hypot(move_x, move_y)
+
+        if move_magnitude != 0:
+            agent["dx"] = move_x / move_magnitude * 2
+            agent["dy"] = move_y / move_magnitude * 2
 
         agent["x"] += agent["dx"]
         agent["y"] += agent["dy"]
@@ -157,6 +198,9 @@ while running:
 
         if agent["y"] <= AGENT_RADIUS or agent["y"] >= HEIGHT - AGENT_RADIUS:
             agent["dy"] *= -1
+
+        agent["x"] = max(AGENT_RADIUS, min(WIDTH - AGENT_RADIUS, agent["x"]))
+        agent["y"] = max(AGENT_RADIUS, min(HEIGHT - AGENT_RADIUS, agent["y"]))
 
         for food in foods[:]:
 
