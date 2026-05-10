@@ -1,14 +1,21 @@
 import pygame
 import random
+import math
 
 pygame.init()
 
 WIDTH = 800
 HEIGHT = 600
+
 AGENT_COUNT = 20
+FOOD_COUNT = 40
+
 AGENT_RADIUS = 5
-AGENT_COLOR = (0, 255, 100)
+FOOD_RADIUS = 3
+
 BACKGROUND_COLOR = (20, 20, 20)
+AGENT_COLOR = (0, 255, 100)
+FOOD_COLOR = (255, 80, 80)
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Autonomous Agent Sandbox")
@@ -17,7 +24,6 @@ clock = pygame.time.Clock()
 
 
 def random_velocity():
-    """Return a non-zero velocity so agents always move."""
     return random.choice([-2, -1, 1, 2])
 
 
@@ -32,16 +38,37 @@ for _ in range(AGENT_COUNT):
     })
 
 
+foods = []
+
+for _ in range(FOOD_COUNT):
+    foods.append({
+        "x": random.randint(FOOD_RADIUS, WIDTH - FOOD_RADIUS),
+        "y": random.randint(FOOD_RADIUS, HEIGHT - FOOD_RADIUS)
+    })
+
+
 running = True
 
 while running:
+
     screen.fill(BACKGROUND_COLOR)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
+    # DRAW FOOD
+    for food in foods:
+        pygame.draw.circle(
+            screen,
+            FOOD_COLOR,
+            (food["x"], food["y"]),
+            FOOD_RADIUS
+        )
+
+    # UPDATE AGENTS
     for agent in agents:
+
         agent["x"] += agent["dx"]
         agent["y"] += agent["dy"]
 
