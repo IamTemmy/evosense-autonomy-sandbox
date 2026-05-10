@@ -91,6 +91,7 @@ BACKGROUND_COLOR = (20, 20, 20)
 FOOD_COLOR = (255, 80, 80)
 TEXT_COLOR = (230, 230, 230)
 HAZARD_COLOR = (90, 20, 80)
+SENSOR_COLOR = (120, 120, 120)
 
 HAZARD_ZONE = pygame.Rect(300, 200, 200, 160)
 
@@ -103,6 +104,7 @@ font = pygame.font.SysFont("Arial", 18)
 births = 0
 deaths = 0
 hazard_enabled = True
+sensor_display_enabled = False
 next_lineage_id = 1
 next_agent_id = 1
 frame_count = 0
@@ -383,6 +385,7 @@ def draw_stats():
         f"Deaths: {deaths}",
         f"Living Lineages: {stats_data['living_lineages']}",
         f"Hazard: {'ON' if hazard_enabled else 'OFF'}",
+        f"Sensors: {'ON' if sensor_display_enabled else 'OFF'}",
         f"Time: {frame_count / FPS:.1f}s",
         f"Logging: {SIMULATION_LOG_FILE}",
         f"Agent Log: {AGENT_LOG_FILE}",
@@ -421,6 +424,7 @@ def draw_stats():
         "Controls:",
         "R = Reset",
         "H = Toggle hazard",
+        "S = Toggle sensors",
         "F = Add food",
         "G = Remove food"
     ]
@@ -456,6 +460,9 @@ while running:
 
             if event.key == pygame.K_h:
                 hazard_enabled = not hazard_enabled
+
+            if event.key == pygame.K_s:
+                sensor_display_enabled = not sensor_display_enabled
 
             if event.key == pygame.K_f:
                 for _ in range(5):
@@ -568,6 +575,15 @@ while running:
 
             newborn_agents.append(child)
             births += 1
+
+        if sensor_display_enabled:
+            pygame.draw.circle(
+                screen,
+                SENSOR_COLOR,
+                (int(agent["x"]), int(agent["y"])),
+                int(agent["vision_radius"]),
+                1
+            )
 
         dynamic_radius = max(3, min(12, int(agent["energy"] / 15)))
 
