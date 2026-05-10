@@ -81,7 +81,6 @@ while running:
             agents.remove(agent)
             continue
 
-        # FIND CLOSEST FOOD
         closest_food = None
         closest_distance = float("inf")
 
@@ -95,7 +94,6 @@ while running:
                 closest_distance = distance
                 closest_food = food
 
-        # MOVE TOWARD FOOD
         if closest_food:
 
             direction_x = closest_food["x"] - agent["x"]
@@ -110,14 +108,12 @@ while running:
         agent["x"] += agent["dx"]
         agent["y"] += agent["dy"]
 
-        # WALL BOUNCE
         if agent["x"] <= AGENT_RADIUS or agent["x"] >= WIDTH - AGENT_RADIUS:
             agent["dx"] *= -1
 
         if agent["y"] <= AGENT_RADIUS or agent["y"] >= HEIGHT - AGENT_RADIUS:
             agent["dy"] *= -1
 
-        # FOOD COLLISION
         for food in foods[:]:
 
             distance = math.hypot(
@@ -132,11 +128,13 @@ while running:
                 agent["food_eaten"] += 1
                 agent["energy"] += FOOD_ENERGY_GAIN
 
+        dynamic_radius = max(3, min(12, int(agent["energy"] / 15)))
+
         pygame.draw.circle(
             screen,
             AGENT_COLOR,
             (int(agent["x"]), int(agent["y"])),
-            AGENT_RADIUS
+            dynamic_radius
         )
 
     pygame.display.flip()
