@@ -16,7 +16,10 @@ FOOD_RADIUS = 3
 
 EAT_DISTANCE = 8
 VISION_RADIUS = 100
-HAZARD_AVOID_RADIUS = 80
+HAZARD_AVOID_RADIUS = 90
+
+AGENT_SPEED = 2.0
+MIN_SPEED = 0.6
 
 STARTING_ENERGY = 100
 ENERGY_LOSS_RATE = 0.14
@@ -44,7 +47,8 @@ deaths = 0
 
 
 def random_velocity():
-    return random.choice([-2, -1, 1, 2])
+    angle = random.uniform(0, math.tau)
+    return math.cos(angle) * AGENT_SPEED, math.sin(angle) * AGENT_SPEED
 
 
 def create_food():
@@ -55,14 +59,31 @@ def create_food():
 
 
 def create_agent(x=None, y=None):
+    dx, dy = random_velocity()
+
     return {
         "x": x if x is not None else random.randint(AGENT_RADIUS, WIDTH - AGENT_RADIUS),
         "y": y if y is not None else random.randint(AGENT_RADIUS, HEIGHT - AGENT_RADIUS),
-        "dx": random_velocity(),
-        "dy": random_velocity(),
+        "dx": dx,
+        "dy": dy,
         "energy": STARTING_ENERGY,
         "food_eaten": 0
     }
+
+
+def closest_point_on_rect(rect, x, y):
+    closest_x = max(rect.left, min(x, rect.right))
+    closest_y = max(rect.top, min(y, rect.bottom))
+    return closest_x, closest_y
+
+
+def normalize_vector(x, y, speed):
+    magnitude = math.hypot(x, y)
+
+    if magnitude < MIN_SPEED:
+        return random_velocity()
+
+    return x / magnitude * speed, y / magnitude * speed
 
 
 def draw_stats():
@@ -89,12 +110,6 @@ def draw_stats():
         y += 22
 
 
-def closest_point_on_rect(rect, x, y):
-    closest_x = max(rect.left, min(x, rect.right))
-    closest_y = max(rect.top, min(y, rect.bottom))
-    return closest_x, closest_y
-
-
 agents = [create_agent() for _ in range(AGENT_COUNT)]
 foods = [create_food() for _ in range(FOOD_COUNT)]
 
@@ -103,7 +118,6 @@ running = True
 while running:
 
     screen.fill(BACKGROUND_COLOR)
-
     pygame.draw.rect(screen, HAZARD_COLOR, HAZARD_ZONE)
 
     for event in pygame.event.get():
@@ -151,44 +165,52 @@ while running:
         move_y = agent["dy"]
 
         if closest_food:
-            direction_x = closest_food["x"] - agent["x"]
-            direction_y = closest_food["y"] - agent["y"]
+            food_x = closest_food["x"] - agent["x"]
+            food_y = closest_food["y"] - agent["y"]
 
-            magnitude = math.hypot(direction_x, direction_y)
+            food_magnitude = math.hypot(food_x, food_y)
 
-            if magnitude != 0:
-                move_x = direction_x / magnitude * 2
-                move_y = direction_y / magnitude * 2
+            if food_magnitude != 0:
+                move_x += food_x / food_magnitude * 2.0
+                move_y += food_y / food_magnitude * 2.0
+        else:
+            if random.random() < 0.02:
+                wander_dx, wander_dy = random_velocity()
+                move_x += wander_dx
+                move_y += wander_dy
 
-        hazard_x, hazard_y = closest_point_on_rect(
-            HAZARD_ZONE,
-            agent["x"],
-            agent["y"]
-        )
+        if HAZARD_ZONE.collidepoint(agent_position):
+            hazard_center_x = HAZARD_ZONE.centerx
+            hazard_center_y = HAZARD_ZONE.centery
 
-        hazard_distance = math.hypot(
-            agent["x"] - hazard_x,
-            agent["y"] - hazard_y
-        )
+            avoid_x = agent["x"] - hazard_center_x
+            avoid_y = agent["y"] - hazard_center_y
+        else:
+            hazard_x, hazard_y = closest_point_on_rect(
+                HAZARD_ZONE,
+                agent["x"],
+                agent["y"]
+            )
 
-        if hazard_distance < HAZARD_AVOID_RADIUS:
+            hazard_distance = math.hypot(
+                agent["x"] - hazard_x,
+                agent["y"] - hazard_y
+            )
+
             avoid_x = agent["x"] - hazard_x
             avoid_y = agent["y"] - hazard_y
 
-            avoid_magnitude = math.hypot(avoid_x, avoid_y)
+            if hazard_distance > HAZARD_AVOID_RADIUS:
+                avoid_x = 0
+                avoid_y = 0
 
-            if avoid_magnitude != 0:
-                avoid_x = avoid_x / avoid_magnitude * 2.5
-                avoid_y = avoid_y / avoid_magnitude * 2.5
+        avoid_magnitude = math.hypot(avoid_x, avoid_y)
 
-                move_x += avoid_x
-                move_y += avoid_y
+        if avoid_magnitude != 0:
+            move_x += avoid_x / avoid_magnitude * 3.0
+            move_y += avoid_y / avoid_magnitude * 3.0
 
-        move_magnitude = math.hypot(move_x, move_y)
-
-        if move_magnitude != 0:
-            agent["dx"] = move_x / move_magnitude * 2
-            agent["dy"] = move_y / move_magnitude * 2
+        agent["dx"], agent["dy"] = normalize_vector(move_x, move_y, AGENT_SPEED)
 
         agent["x"] += agent["dx"]
         agent["y"] += agent["dy"]
