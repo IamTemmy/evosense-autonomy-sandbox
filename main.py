@@ -12,7 +12,9 @@ FOOD_COUNT = 40
 
 AGENT_RADIUS = 5
 FOOD_RADIUS = 3
+
 EAT_DISTANCE = 8
+VISION_RADIUS = 120
 
 STARTING_ENERGY = 100
 ENERGY_LOSS_RATE = 0.08
@@ -79,21 +81,54 @@ while running:
             agents.remove(agent)
             continue
 
+        # FIND CLOSEST FOOD
+        closest_food = None
+        closest_distance = float("inf")
+
+        for food in foods:
+            distance = math.hypot(
+                food["x"] - agent["x"],
+                food["y"] - agent["y"]
+            )
+
+            if distance < closest_distance and distance < VISION_RADIUS:
+                closest_distance = distance
+                closest_food = food
+
+        # MOVE TOWARD FOOD
+        if closest_food:
+
+            direction_x = closest_food["x"] - agent["x"]
+            direction_y = closest_food["y"] - agent["y"]
+
+            magnitude = math.hypot(direction_x, direction_y)
+
+            if magnitude != 0:
+                agent["dx"] = direction_x / magnitude * 2
+                agent["dy"] = direction_y / magnitude * 2
+
         agent["x"] += agent["dx"]
         agent["y"] += agent["dy"]
 
+        # WALL BOUNCE
         if agent["x"] <= AGENT_RADIUS or agent["x"] >= WIDTH - AGENT_RADIUS:
             agent["dx"] *= -1
 
         if agent["y"] <= AGENT_RADIUS or agent["y"] >= HEIGHT - AGENT_RADIUS:
             agent["dy"] *= -1
 
+        # FOOD COLLISION
         for food in foods[:]:
-            distance = math.hypot(agent["x"] - food["x"], agent["y"] - food["y"])
+
+            distance = math.hypot(
+                agent["x"] - food["x"],
+                agent["y"] - food["y"]
+            )
 
             if distance < EAT_DISTANCE:
                 foods.remove(food)
                 foods.append(create_food())
+
                 agent["food_eaten"] += 1
                 agent["energy"] += FOOD_ENERGY_GAIN
 
