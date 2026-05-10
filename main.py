@@ -11,8 +11,47 @@ WIDTH = 800
 HEIGHT = 600
 FPS = 60
 
-AGENT_COUNT = 20
-FOOD_COUNT = 18
+EXPERIMENT_PRESET = "balanced"
+
+PRESETS = {
+    "balanced": {
+        "agent_count": 20,
+        "food_count": 18,
+        "hazard_energy_loss_rate": 0.35,
+        "food_energy_gain": 24,
+        "reproduction_energy": 160,
+        "reproduction_cost": 70
+    },
+    "scarce": {
+        "agent_count": 20,
+        "food_count": 10,
+        "hazard_energy_loss_rate": 0.35,
+        "food_energy_gain": 18,
+        "reproduction_energy": 170,
+        "reproduction_cost": 75
+    },
+    "abundant": {
+        "agent_count": 20,
+        "food_count": 30,
+        "hazard_energy_loss_rate": 0.25,
+        "food_energy_gain": 30,
+        "reproduction_energy": 145,
+        "reproduction_cost": 60
+    },
+    "harsh": {
+        "agent_count": 25,
+        "food_count": 8,
+        "hazard_energy_loss_rate": 0.55,
+        "food_energy_gain": 16,
+        "reproduction_energy": 180,
+        "reproduction_cost": 85
+    }
+}
+
+preset = PRESETS[EXPERIMENT_PRESET]
+
+AGENT_COUNT = preset["agent_count"]
+FOOD_COUNT = preset["food_count"]
 MAX_AGENTS = 60
 
 AGENT_RADIUS = 5
@@ -20,10 +59,10 @@ FOOD_RADIUS = 3
 EAT_DISTANCE = 8
 
 STARTING_ENERGY = 100
-HAZARD_ENERGY_LOSS_RATE = 0.35
-FOOD_ENERGY_GAIN = 24
-REPRODUCTION_ENERGY = 160
-REPRODUCTION_COST = 70
+HAZARD_ENERGY_LOSS_RATE = preset["hazard_energy_loss_rate"]
+FOOD_ENERGY_GAIN = preset["food_energy_gain"]
+REPRODUCTION_ENERGY = preset["reproduction_energy"]
+REPRODUCTION_COST = preset["reproduction_cost"]
 
 MUTATION_RATE = 0.12
 COLOR_MUTATION_RATE = 18
@@ -159,6 +198,7 @@ def initialize_log_file():
         writer.writerow([
             "frame",
             "time_seconds",
+            "preset",
             "population",
             "food_count",
             "births",
@@ -212,6 +252,7 @@ def log_simulation_data():
         writer.writerow([
             frame_count,
             round(frame_count / FPS, 2),
+            EXPERIMENT_PRESET,
             len(agents),
             len(foods),
             births,
@@ -250,6 +291,7 @@ def draw_stats():
     stats_data = get_average_stats()
 
     stats = [
+        f"Preset: {EXPERIMENT_PRESET}",
         f"Population: {len(agents)}",
         f"Food: {len(foods)}",
         f"Average Energy: {stats_data['average_energy']:.1f}",
