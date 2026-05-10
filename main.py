@@ -27,6 +27,7 @@ REPRODUCTION_ENERGY = 160
 REPRODUCTION_COST = 70
 
 MUTATION_RATE = 0.12
+COLOR_MUTATION_RATE = 18
 
 MIN_SPEED = 1.0
 MAX_SPEED = 3.5
@@ -38,7 +39,6 @@ MIN_ENERGY_LOSS_RATE = 0.08
 MAX_ENERGY_LOSS_RATE = 0.25
 
 BACKGROUND_COLOR = (20, 20, 20)
-AGENT_COLOR = (0, 255, 100)
 FOOD_COLOR = (255, 80, 80)
 TEXT_COLOR = (230, 230, 230)
 HAZARD_COLOR = (90, 20, 80)
@@ -54,6 +54,7 @@ font = pygame.font.SysFont("Arial", 18)
 births = 0
 deaths = 0
 hazard_enabled = True
+next_lineage_id = 1
 
 
 def clamp(value, min_value, max_value):
@@ -63,6 +64,24 @@ def clamp(value, min_value, max_value):
 def mutate(value, mutation_strength, min_value, max_value):
     mutation = random.uniform(-mutation_strength, mutation_strength)
     return clamp(value + mutation, min_value, max_value)
+
+
+def mutate_color(color):
+    r, g, b = color
+
+    r = int(clamp(r + random.randint(-COLOR_MUTATION_RATE, COLOR_MUTATION_RATE), 40, 255))
+    g = int(clamp(g + random.randint(-COLOR_MUTATION_RATE, COLOR_MUTATION_RATE), 40, 255))
+    b = int(clamp(b + random.randint(-COLOR_MUTATION_RATE, COLOR_MUTATION_RATE), 40, 255))
+
+    return (r, g, b)
+
+
+def random_agent_color():
+    return (
+        random.randint(80, 255),
+        random.randint(80, 255),
+        random.randint(80, 255)
+    )
 
 
 def random_velocity(speed):
@@ -89,6 +108,8 @@ def create_food():
 
 
 def create_agent(x=None, y=None, parent=None):
+    global next_lineage_id
+
     if parent:
         speed = mutate(parent["speed"], MUTATION_RATE, MIN_SPEED, MAX_SPEED)
         vision_radius = mutate(parent["vision_radius"], 12, MIN_VISION_RADIUS, MAX_VISION_RADIUS)
@@ -98,10 +119,18 @@ def create_agent(x=None, y=None, parent=None):
             MIN_ENERGY_LOSS_RATE,
             MAX_ENERGY_LOSS_RATE
         )
+
+        color = mutate_color(parent["color"])
+        lineage_id = parent["lineage_id"]
+
     else:
         speed = random.uniform(1.5, 2.5)
         vision_radius = random.uniform(90, 150)
         energy_loss_rate = random.uniform(0.11, 0.17)
+
+        color = random_agent_color()
+        lineage_id = next_lineage_id
+        next_lineage_id += 1
 
     dx, dy = random_velocity(speed)
 
@@ -114,13 +143,16 @@ def create_agent(x=None, y=None, parent=None):
         "food_eaten": 0,
         "speed": speed,
         "vision_radius": vision_radius,
-        "energy_loss_rate": energy_loss_rate
+        "energy_loss_rate": energy_loss_rate,
+        "color": color,
+        "lineage_id": lineage_id
     }
 
 
 def reset_simulation():
-    global agents, foods, births, deaths
+    global agents, foods, births, deaths, next_lineage_id
 
+    next_lineage_id = 1
     agents = [create_agent() for _ in range(AGENT_COUNT)]
     foods = [create_food() for _ in range(FOOD_COUNT)]
     births = 0
@@ -133,11 +165,14 @@ def draw_stats():
         average_speed = sum(agent["speed"] for agent in agents) / len(agents)
         average_vision = sum(agent["vision_radius"] for agent in agents) / len(agents)
         average_energy_loss = sum(agent["energy_loss_rate"] for agent in agents) / len(agents)
+
+        living_lineages = len(set(agent["lineage_id"] for agent in agents))
     else:
         average_energy = 0
         average_speed = 0
         average_vision = 0
         average_energy_loss = 0
+        living_lineages = 0
 
     stats = [
         f"Population: {len(agents)}",
@@ -145,6 +180,7 @@ def draw_stats():
         f"Average Energy: {average_energy:.1f}",
         f"Births: {births}",
         f"Deaths: {deaths}",
+        f"Living Lineages: {living_lineages}",
         f"Hazard: {'ON' if hazard_enabled else 'OFF'}",
         "",
         "Traits:",
@@ -304,7 +340,7 @@ while running:
 
         pygame.draw.circle(
             screen,
-            AGENT_COLOR,
+            agent["color"],
             (int(agent["x"]), int(agent["y"])),
             dynamic_radius
         )
