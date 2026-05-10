@@ -9,12 +9,17 @@ os.makedirs(PLOTS_FOLDER, exist_ok=True)
 
 data = pd.read_csv(LOG_FILE)
 
+if "preset" in data.columns and len(data["preset"]) > 0:
+    preset_name = data["preset"].iloc[0]
+else:
+    preset_name = "unknown"
+
 # -----------------------------
 # Population Plot
 # -----------------------------
 plt.figure(figsize=(10, 5))
 plt.plot(data["time_seconds"], data["population"])
-plt.title("Population Over Time")
+plt.title(f"Population Over Time - Preset: {preset_name}")
 plt.xlabel("Time (seconds)")
 plt.ylabel("Population")
 plt.grid(True)
@@ -27,7 +32,7 @@ plt.close()
 # -----------------------------
 plt.figure(figsize=(10, 5))
 plt.plot(data["time_seconds"], data["average_energy"])
-plt.title("Average Energy Over Time")
+plt.title(f"Average Energy Over Time - Preset: {preset_name}")
 plt.xlabel("Time (seconds)")
 plt.ylabel("Average Energy")
 plt.grid(True)
@@ -42,7 +47,7 @@ plt.figure(figsize=(10, 5))
 plt.plot(data["time_seconds"], data["births"], label="Births")
 plt.plot(data["time_seconds"], data["deaths"], label="Deaths")
 
-plt.title("Births and Deaths Over Time")
+plt.title(f"Births and Deaths Over Time - Preset: {preset_name}")
 plt.xlabel("Time (seconds)")
 plt.ylabel("Count")
 plt.legend()
@@ -60,7 +65,7 @@ plt.plot(data["time_seconds"], data["average_speed"], label="Speed")
 plt.plot(data["time_seconds"], data["average_vision"], label="Vision Radius")
 plt.plot(data["time_seconds"], data["average_energy_loss"], label="Energy Loss")
 
-plt.title("Trait Evolution Over Time")
+plt.title(f"Trait Evolution Over Time - Preset: {preset_name}")
 plt.xlabel("Time (seconds)")
 plt.ylabel("Trait Value")
 plt.legend()
@@ -70,4 +75,5 @@ plt.savefig(f"{PLOTS_FOLDER}/trait_evolution_plot.png")
 plt.close()
 
 print("Plots generated successfully.")
+print(f"Preset: {preset_name}")
 print(f"Saved in: {PLOTS_FOLDER}/")
