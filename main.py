@@ -164,6 +164,19 @@ def get_lineage_stats():
     return lineage_counts.most_common(3)
 
 
+def get_lineage_color(lineage_id):
+    lineage_agents = [agent for agent in agents if agent["lineage_id"] == lineage_id]
+
+    if not lineage_agents:
+        return TEXT_COLOR
+
+    red = int(sum(agent["color"][0] for agent in lineage_agents) / len(lineage_agents))
+    green = int(sum(agent["color"][1] for agent in lineage_agents) / len(lineage_agents))
+    blue = int(sum(agent["color"][2] for agent in lineage_agents) / len(lineage_agents))
+
+    return (red, green, blue)
+
+
 def draw_stats():
     if agents:
         average_energy = sum(agent["energy"] for agent in agents) / len(agents)
@@ -195,22 +208,38 @@ def draw_stats():
         "Top Lineages:"
     ]
 
-    for lineage_id, count in get_lineage_stats():
-        stats.append(f"Lineage {lineage_id}: {count} agents")
+    y = 10
 
-    stats.extend([
+    for stat in stats:
+        text_surface = font.render(stat, True, TEXT_COLOR)
+        screen.blit(text_surface, (10, y))
+        y += 22
+
+    for lineage_id, count in get_lineage_stats():
+        lineage_color = get_lineage_color(lineage_id)
+
+        pygame.draw.rect(screen, lineage_color, (10, y + 4, 14, 14))
+
+        text_surface = font.render(
+            f"Lineage {lineage_id}: {count} agents",
+            True,
+            TEXT_COLOR
+        )
+
+        screen.blit(text_surface, (32, y))
+        y += 22
+
+    control_lines = [
         "",
         "Controls:",
         "R = Reset",
         "H = Toggle hazard",
         "F = Add food",
         "G = Remove food"
-    ])
+    ]
 
-    y = 10
-
-    for stat in stats:
-        text_surface = font.render(stat, True, TEXT_COLOR)
+    for line in control_lines:
+        text_surface = font.render(line, True, TEXT_COLOR)
         screen.blit(text_surface, (10, y))
         y += 22
 
@@ -287,6 +316,7 @@ while running:
         if closest_food:
             direction_x = closest_food["x"] - agent["x"]
             direction_y = closest_food["y"] - agent["y"]
+
             agent["dx"], agent["dy"] = normalize_vector(
                 direction_x,
                 direction_y,
