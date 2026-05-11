@@ -82,6 +82,10 @@ MIN_VISION_RADIUS = 60
 MAX_VISION_RADIUS = 200
 MIN_ENERGY_LOSS_RATE = 0.08
 MAX_ENERGY_LOSS_RATE = 0.25
+MIN_RISK_TOLERANCE = 0.10
+MAX_RISK_TOLERANCE = 1.00
+
+HAZARD_INFLUENCE_RADIUS = 120
 
 LOG_INTERVAL_FRAMES = 60
 SIMULATION_LOG_FILE = "data/simulation_log.csv"
@@ -151,6 +155,32 @@ def normalize_vector(x, y, speed):
     return x / magnitude * speed, y / magnitude * speed
 
 
+def closest_point_on_rect(rect, x, y):
+    closest_x = clamp(x, rect.left, rect.right)
+    closest_y = clamp(y, rect.top, rect.bottom)
+    return closest_x, closest_y
+
+
+def distance_to_hazard(x, y):
+    closest_x, closest_y = closest_point_on_rect(HAZARD_ZONE, x, y)
+    return math.hypot(x - closest_x, y - closest_y)
+
+
+def hazard_risk_at_point(x, y):
+    if not hazard_enabled:
+        return 0
+
+    if HAZARD_ZONE.collidepoint(int(x), int(y)):
+        return 1
+
+    distance = distance_to_hazard(x, y)
+
+    if distance >= HAZARD_INFLUENCE_RADIUS:
+        return 0
+
+    return 1 - (distance / HAZARD_INFLUENCE_RADIUS)
+
+
 def create_food():
     while True:
         x = random.randint(FOOD_RADIUS, WIDTH - FOOD_RADIUS)
@@ -172,6 +202,12 @@ def create_agent(x=None, y=None, parent=None):
             MIN_ENERGY_LOSS_RATE,
             MAX_ENERGY_LOSS_RATE
         )
+        risk_tolerance = mutate(
+            parent["risk_tolerance"],
+            0.08,
+            MIN_RISK_TOLERANCE,
+            MAX_RISK_TOLERANCE
+        )
 
         color = mutate_color(parent["color"])
         lineage_id = parent["lineage_id"]
@@ -181,6 +217,7 @@ def create_agent(x=None, y=None, parent=None):
         speed = random.uniform(1.5, 2.5)
         vision_radius = random.uniform(90, 150)
         energy_loss_rate = random.uniform(0.11, 0.17)
+        risk_tolerance = random.uniform(0.25, 0.75)
 
         color = random_agent_color()
         lineage_id = next_lineage_id
@@ -203,6 +240,7 @@ def create_agent(x=None, y=None, parent=None):
         "speed": speed,
         "vision_radius": vision_radius,
         "energy_loss_rate": energy_loss_rate,
+        "risk_tolerance": risk_tolerance,
         "color": color,
         "birth_frame": frame_count
     }
@@ -229,6 +267,7 @@ def initialize_simulation_log_file():
             "average_speed",
             "average_vision",
             "average_energy_loss",
+            "average_risk_tolerance",
             "living_lineages",
             "hazard_enabled"
         ])
@@ -252,6 +291,7 @@ def initialize_agent_log_file():
             "speed",
             "vision_radius",
             "energy_loss_rate",
+            "risk_tolerance",
             "food_eaten",
             "birth_count",
             "final_energy",
@@ -280,6 +320,7 @@ def log_agent(agent, status):
             round(agent["speed"], 3),
             round(agent["vision_radius"], 3),
             round(agent["energy_loss_rate"], 5),
+            round(agent["risk_tolerance"], 3),
             agent["food_eaten"],
             agent["birth_count"],
             round(agent["energy"], 3),
@@ -317,6 +358,7 @@ def get_average_stats():
             "average_speed": 0,
             "average_vision": 0,
             "average_energy_loss": 0,
+            "average_risk_tolerance": 0,
             "living_lineages": 0
         }
 
@@ -325,6 +367,7 @@ def get_average_stats():
         "average_speed": sum(agent["speed"] for agent in agents) / len(agents),
         "average_vision": sum(agent["vision_radius"] for agent in agents) / len(agents),
         "average_energy_loss": sum(agent["energy_loss_rate"] for agent in agents) / len(agents),
+        "average_risk_tolerance": sum(agent["risk_tolerance"] for agent in agents) / len(agents),
         "living_lineages": len(set(agent["lineage_id"] for agent in agents))
     }
 
@@ -347,6 +390,7 @@ def log_simulation_data():
             round(stats["average_speed"], 3),
             round(stats["average_vision"], 3),
             round(stats["average_energy_loss"], 5),
+            round(stats["average_risk_tolerance"], 3),
             stats["living_lineages"],
             hazard_enabled
         ])
@@ -373,6 +417,72 @@ def get_lineage_color(lineage_id):
     return (red, green, blue)
 
 
+def choose_best_food(agent):
+    best_food = None
+    best_score = float("-inf")
+
+    for food in foods:
+        distance = math.hypot(
+            food["x"] - agent["x"],
+            food["y"] - agent["y"]
+        )
+
+        if distance > agent["vision_radius"]:
+            continue
+
+        distance_score = 1 - (distance / agent["vision_radius"])
+        risk_score = hazard_risk_at_point(food["x"], food["y"])
+        risk_penalty = risk_score * (1 - agent["risk_tolerance"])
+
+        energy_urgency = 1 - clamp(agent["energy"] / STARTING_ENERGY, 0, 1)
+        hunger_bonus = energy_urgency * 0.4
+
+        score = distance_score + hunger_bonus - risk_penalty
+
+        if score > best_score:
+            best_score = score
+            best_food = food
+
+    return best_food
+
+
+def apply_hazard_avoidance(agent, move_x, move_y):
+    if not hazard_enabled:
+        return move_x, move_y
+
+    hazard_distance = distance_to_hazard(agent["x"], agent["y"])
+    agent_position = (int(agent["x"]), int(agent["y"]))
+
+    cautious_detection_radius = HAZARD_INFLUENCE_RADIUS * (1.2 - agent["risk_tolerance"])
+
+    if HAZARD_ZONE.collidepoint(agent_position):
+        avoid_x = agent["x"] - HAZARD_ZONE.centerx
+        avoid_y = agent["y"] - HAZARD_ZONE.centery
+        avoid_strength = 3.0 * (1.2 - agent["risk_tolerance"])
+
+        avoid_dx, avoid_dy = normalize_vector(avoid_x, avoid_y, avoid_strength)
+        move_x += avoid_dx
+        move_y += avoid_dy
+
+    elif hazard_distance < cautious_detection_radius:
+        hazard_x, hazard_y = closest_point_on_rect(HAZARD_ZONE, agent["x"], agent["y"])
+
+        avoid_x = agent["x"] - hazard_x
+        avoid_y = agent["y"] - hazard_y
+
+        proximity_factor = 1 - (hazard_distance / cautious_detection_radius)
+        caution_factor = 1 - agent["risk_tolerance"]
+
+        avoid_strength = 2.5 * proximity_factor * caution_factor
+
+        if avoid_strength > 0:
+            avoid_dx, avoid_dy = normalize_vector(avoid_x, avoid_y, avoid_strength)
+            move_x += avoid_dx
+            move_y += avoid_dy
+
+    return move_x, move_y
+
+
 def draw_stats():
     stats_data = get_average_stats()
 
@@ -387,13 +497,12 @@ def draw_stats():
         f"Hazard: {'ON' if hazard_enabled else 'OFF'}",
         f"Sensors: {'ON' if sensor_display_enabled else 'OFF'}",
         f"Time: {frame_count / FPS:.1f}s",
-        f"Logging: {SIMULATION_LOG_FILE}",
-        f"Agent Log: {AGENT_LOG_FILE}",
         "",
         "Traits:",
         f"Avg Speed: {stats_data['average_speed']:.2f}",
         f"Avg Vision: {stats_data['average_vision']:.1f}",
         f"Avg Energy Loss: {stats_data['average_energy_loss']:.3f}",
+        f"Avg Risk Tolerance: {stats_data['average_risk_tolerance']:.2f}",
         "",
         "Top Lineages:"
     ]
@@ -497,38 +606,34 @@ while running:
             deaths += 1
             continue
 
-        closest_food = None
-        closest_distance = float("inf")
+        target_food = choose_best_food(agent)
 
-        for food in foods:
-            distance = math.hypot(
-                food["x"] - agent["x"],
-                food["y"] - agent["y"]
-            )
+        move_x = agent["dx"]
+        move_y = agent["dy"]
 
-            if distance < closest_distance and distance < agent["vision_radius"]:
-                closest_distance = distance
-                closest_food = food
+        if target_food:
+            direction_x = target_food["x"] - agent["x"]
+            direction_y = target_food["y"] - agent["y"]
 
-        if closest_food:
-            direction_x = closest_food["x"] - agent["x"]
-            direction_y = closest_food["y"] - agent["y"]
-
-            agent["dx"], agent["dy"] = normalize_vector(
+            food_dx, food_dy = normalize_vector(
                 direction_x,
                 direction_y,
                 agent["speed"]
             )
+
+            move_x += food_dx
+            move_y += food_dy
         else:
             if random.random() < 0.03:
-                agent["dx"], agent["dy"] = random_velocity(agent["speed"])
+                move_x, move_y = random_velocity(agent["speed"])
 
-        if hazard_enabled and HAZARD_ZONE.collidepoint(agent_position):
-            agent["dx"] *= 0.95
-            agent["dy"] *= 0.95
+        move_x, move_y = apply_hazard_avoidance(agent, move_x, move_y)
 
-            if random.random() < 0.08:
-                agent["dx"], agent["dy"] = random_velocity(agent["speed"])
+        agent["dx"], agent["dy"] = normalize_vector(
+            move_x,
+            move_y,
+            agent["speed"]
+        )
 
         agent["x"] += agent["dx"]
         agent["y"] += agent["dy"]
