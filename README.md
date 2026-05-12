@@ -1,6 +1,8 @@
 # Autonomous Agent Sandbox
 
-A lightweight ecosystem and autonomous-agent simulation built with Python and Pygame.
+A lightweight simulation framework for studying autonomous agents, environmental constraints, sensor-driven behavior, risk-aware navigation, and adaptive decision-making.
+
+This project began as a simple agent-based ecosystem simulation and is evolving into a small-scale autonomy systems sandbox. The goal is to model how independent agents sense their environment, make decisions under constraints, respond to hazards, manage energy, and adapt over time.
 
 This project explores how autonomous entities behave inside dynamic environments with:
 - resource scarcity
