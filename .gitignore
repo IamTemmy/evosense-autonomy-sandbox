@@ -1,12 +1,9 @@
-# Python cache
-__pycache__/
-*.pyc
+# Simulation outputs
+data/*.csv
+plots/*.png
 
-# Generated simulation data
-data/simulation_log.csv
-
-# Generated plots
-plots/
-
-# macOS files
+# macOS
 .DS_Store
+
+# Local screenshots
+Screenshot*.png
