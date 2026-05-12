@@ -1,252 +1,467 @@
 # Autonomous Agent Sandbox
 
-A lightweight simulation framework for studying autonomous agents, environmental constraints, sensor-driven behavior, risk-aware navigation, and adaptive decision-making.
+A lightweight simulation framework for studying autonomous-agent behavior under environmental constraints, imperfect sensing, adaptive traits, and risk-aware navigation.
 
-This project began as a simple agent-based ecosystem simulation and is evolving into a small-scale autonomy systems sandbox. The goal is to model how independent agents sense their environment, make decisions under constraints, respond to hazards, manage energy, and adapt over time.
+---
 
-This project explores how autonomous entities behave inside dynamic environments with:
-- resource scarcity
-- energy constraints
-- survival pressure
-- reproduction
-- environmental interaction
+## Overview
 
-The long-term goal is to evolve this sandbox into a broader experimentation platform for:
-- autonomous systems
-- swarm intelligence
-- environmental simulations
-- adaptive behavior modeling
-- robotics concepts
-- ecosystem simulations
-- digital twin experimentation
+Autonomous Agent Sandbox is an experimental simulation platform designed to model how independent agents behave inside constrained environments.
+
+The project began as a simple survival and adaptation simulation inspired by biological systems. Over time, it evolved into a broader autonomy systems sandbox focused on engineering-oriented concepts such as:
+
+* Sensor-driven behavior
+* Environmental risk assessment
+* Energy-aware navigation
+* Autonomous decision-making
+* Adaptive trait evolution
+* Experiment telemetry and analytics
+* Navigation under uncertainty
+
+The purpose of the project is not to recreate a full autonomous vehicle stack or a commercial robotics simulator. Instead, the goal is to study and visualize foundational principles that appear in real-world autonomy systems at a smaller and understandable scale.
+
+The simulation serves as a controlled environment where agent behavior, sensing limitations, environmental pressure, and navigation strategies can be explored experimentally.
+
+---
+
+# Project Identity
+
+Autonomous Agent Sandbox is now positioned as:
+
+> A lightweight simulation framework for studying autonomous-agent behavior, environmental constraints, sensor-driven navigation, and adaptive decision-making.
+
+The project draws inspiration from engineering domains including:
+
+* Autonomous vehicles
+* Robotics
+* Swarm systems
+* Embedded sensing systems
+* Navigation under uncertainty
+* Adaptive decision architectures
+* Resource-constrained autonomous systems
+
+As the project evolves, new features are evaluated based on whether they represent meaningful autonomy or systems-engineering concepts rather than purely visual or game-like additions.
+
+---
+
+# Core Engineering Concepts
+
+The project focuses on several engineering principles commonly found in autonomous systems.
+
+## 1. Environmental Constraints
+
+Agents operate inside environments containing:
+
+* Limited resources
+* Hazardous regions
+* Energy constraints
+* Competition for survival
+
+This models how autonomous systems must function within imperfect and constrained real-world environments.
+
+---
+
+## 2. Sensor-Driven Behavior
+
+Agents rely on sensing ranges to detect resources and navigate the environment.
+
+The simulation models:
+
+* Detection radius
+* Sensor limitations
+* Imperfect perception
+* Environmental awareness
+
+This parallels how robotics and autonomous systems depend on sensor inputs such as:
+
+* Cameras
+* Radar
+* LiDAR
+* GPS
+* Embedded sensing systems
+
+---
+
+## 3. Risk-Aware Navigation
+
+Agents evaluate:
+
+* Resource reward
+* Hazard proximity
+* Survival tradeoffs
+* Energy efficiency
+
+This approximates real-world autonomous decision-making where systems balance:
+
+* Safety
+* Efficiency
+* Speed
+* Navigation quality
+* Energy usage
+
+---
+
+## 4. Adaptive Traits
+
+Agents possess inheritable traits such as:
+
+* Speed
+* Vision radius
+* Energy efficiency
+* Risk tolerance
+
+Traits mutate across generations, allowing different behavioral strategies to emerge over time.
+
+This models adaptive behavior systems and evolutionary optimization concepts.
+
+---
+
+## 5. Telemetry and Experimentation
+
+The system records:
+
+* Population changes
+* Energy trends
+* Trait evolution
+* Survival statistics
+* Birth and death metrics
+* Lineage information
+* Agent-level data
+
+This creates an experimentation workflow similar to simulation and analytics pipelines used in engineering research.
 
 ---
 
 # Current Features
 
-## Autonomous Agents
-- Agents move independently inside a bounded environment
-- Agents detect nearby food and move toward it
-- Agents consume energy over time
-- Agents die if energy reaches zero
+## Agent Simulation
 
-## Resource System
-- Food spawns dynamically across the environment
-- Agents gain energy when consuming food
-- Resource scarcity affects survival rates
-
-## Adaptive Population
-- Successful agents reproduce
-- Population size changes dynamically
-- Agents visually scale based on energy level
-
-## Simulation Dashboard
-Real-time statistics:
-- population count
-- food count
-- average energy
-- births
-- deaths
+* Independent autonomous agents
+* Dynamic movement behavior
+* Food/resource seeking
+* Energy-based survival
+* Reproduction system
+* Trait inheritance and mutation
 
 ---
 
-# Technologies Used
+## Environmental Systems
 
-- Python
-- Pygame
-- Math / vector calculations
-- Git + GitHub
+* Hazard zones
+* Configurable environments
+* Resource spawning
+* Environmental pressure
+* Risk-aware navigation
 
 ---
 
-# How To Run
+## Sensor Systems
 
-## Clone Repository
+* Vision radius sensing
+* Sensor visualization mode
+* Environmental awareness
+* Risk-based movement logic
 
-```bash
-git clone https://github.com/IamTemmy/autonomous-agent-sandbox.git
-cd autonomous-agent-sandbox
+---
+
+## Adaptive Systems
+
+* Evolutionary trait mutation
+* Risk tolerance behavior
+* Emergent survival strategies
+* Lineage tracking
+
+---
+
+## Data Logging and Analytics
+
+* Simulation logging
+* Agent-level telemetry
+* Population analysis
+* Trait analysis
+* Survival summaries
+* Plot generation
+
+---
+
+# Current Architecture
+
+The project currently operates through several primary systems.
+
+## Simulation Engine
+
+Handles:
+
+* Frame updates
+* Agent movement
+* Environment interaction
+* Rendering
+* Event handling
+
+---
+
+## Agent System
+
+Each agent contains:
+
+* Position
+* Velocity
+* Energy
+* Sensor radius
+* Risk tolerance
+* Movement logic
+* Evolutionary traits
+
+---
+
+## Navigation Logic
+
+Agents:
+
+* Search for resources
+* Evaluate hazard risk
+* Move according to sensed information
+* Balance reward versus danger
+
+---
+
+## Analytics Pipeline
+
+The simulation exports:
+
+* CSV experiment logs
+* Agent-level data
+* Plots and summaries
+
+This allows experiment analysis after each run.
+
+---
+
+# Experiment Presets
+
+The simulation currently supports multiple environment presets.
+
+## Balanced
+
+General-purpose environment with moderate:
+
+* Food availability
+* Hazard pressure
+* Reproduction difficulty
+
+---
+
+## Scarce
+
+Resource-limited environment.
+
+Encourages:
+
+* Competition
+* Efficient navigation
+* Conservative behavior
+
+---
+
+## Abundant
+
+High-resource environment.
+
+Encourages:
+
+* Rapid reproduction
+* Larger populations
+* Reduced survival pressure
+
+---
+
+## Harsh
+
+High-risk environment.
+
+Encourages:
+
+* Strong survival pressure
+* Risk-sensitive navigation
+* Efficient energy usage
+
+---
+
+# Current Project Status
+
+The project is transitioning from:
+
+```text
+simple adaptation simulation
 ```
 
-## Install Dependencies
+toward:
 
-```bash
-python3 -m pip install pygame
+```text
+autonomous systems experimentation framework
 ```
 
-## Run Simulation
+The system currently demonstrates:
+
+* Sensor-based movement
+* Risk-aware navigation
+* Environmental adaptation
+* Emergent behavior
+* Autonomous survival strategies
+
+Future development will focus on:
+
+* Imperfect sensing
+* Sensor noise
+* Navigation under uncertainty
+* Multi-agent interaction
+* Dynamic obstacles
+* Modular architecture
+* Advanced telemetry
+* Potential reinforcement-learning integration
+
+---
+
+# Important Clarification
+
+This project is NOT currently a machine-learning system.
+
+The simulation does not yet use:
+
+* Neural networks
+* Reinforcement learning
+* Model training
+* Gradient descent
+* Learned policies
+
+Instead, the project currently focuses on:
+
+* Autonomous systems architecture
+* Agent-based behavior
+* Environmental interaction
+* Adaptive traits
+* Sensor-driven navigation
+* Decision systems under constraints
+
+Future versions may introduce machine-learning components once the autonomy and simulation foundation becomes more mature.
+
+---
+
+# Why This Project Matters
+
+This project is designed to strengthen understanding of:
+
+* Systems thinking
+* Autonomous behavior
+* Navigation logic
+* Environmental interaction
+* Engineering tradeoffs
+* Simulation workflows
+* Telemetry analysis
+* Adaptive systems
+
+The project is intended to function both as:
+
+* a technical learning platform
+* and a portfolio-quality engineering project
+
+that demonstrates structured experimentation and autonomous systems reasoning.
+
+---
+
+# Running the Simulation
+
+## Run Balanced Preset
 
 ```bash
-python3 main.py
+python3 main.py --preset balanced
+```
+
+## Run Scarce Preset
+
+```bash
+python3 main.py --preset scarce
+```
+
+## Run Abundant Preset
+
+```bash
+python3 main.py --preset abundant
+```
+
+## Run Harsh Preset
+
+```bash
+python3 main.py --preset harsh
 ```
 
 ---
 
-# Development Timeline
+# Generate Experiment Plots
 
-## v0.1
-- Initial autonomous movement system
-
-## v0.2
-- Fixed zero-velocity agents
-
-## v0.3
-- Added food/resource entities
-
-## v0.4
-- Added food consumption system
-
-## v0.5
-- Added energy and death mechanics
-
-## v0.6
-- Added food-seeking behavior
-
-## v0.7
-- Added energy-based size scaling
-
-## v0.8
-- Tuned scarcity and survival balancing
-
-## v0.9
-- Added reproduction system
-
-## v1.0
-- Added real-time simulation dashboard
+```bash
+python3 plot_results.py
+```
 
 ---
 
-# Future Goals
+# Generate Experiment Summary
 
-- Environmental hazard zones
-- Evolutionary traits
-- Speed variation between agents
-- Neural-network-driven agents
-- Reinforcement learning experiments
-- Sensor simulation systems
-- Multi-species ecosystem interactions
-- Autonomous robotics behavior experiments
+```bash
+python3 summarize_results.py
+```
 
 ---
 
-# Vision
+# Controls
 
-This project began as an exploration into how simple autonomous entities interact with changing environments.
-
-The broader vision is to develop a modular experimentation sandbox for studying adaptation, survival, intelligence, and autonomous behavior in dynamic systems.
-
-
----
-
-# Engineering Interpretation
-
-Although the simulation uses simple 2D visuals, the underlying system models several engineering and autonomy-related concepts.
-
-## Autonomous Agents
-
-Each agent operates independently inside the environment. Agents move without centralized control and make local decisions based on nearby resources. This creates a simplified model of autonomous behavior where individual entities react to changing conditions in real time.
-
-## Resource-Constrained Survival
-
-Agents continuously lose energy and must locate food to survive. This introduces resource pressure similar to real engineering systems such as:
-- battery-powered robots
-- autonomous drones
-- distributed sensor systems
-- autonomous vehicles operating under energy constraints
-
-The simulation demonstrates how survival and performance are affected by limited resources.
-
-## Environmental Stressors
-
-The purple hazard zone represents a dangerous environmental region. It can be interpreted as:
-- pollution
-- low oxygen
-- difficult terrain
-- heat zones
-- toxic exposure
-- disaster-affected areas
-
-Agents that remain inside the zone lose energy faster, allowing the environment itself to influence survival outcomes.
-
-## Evolutionary Traits
-
-Agents now possess inherited traits:
-- movement speed
-- vision radius
-- energy consumption rate
-
-When agents reproduce, offspring inherit traits from their parent with slight mutations. Over time, populations may shift toward traits that improve survival.
-
-This introduces a simplified evolutionary system where environmental pressure affects which traits become dominant.
-
-## Lineage Tracking
-
-Each original lineage is assigned a color. Offspring inherit similar colors with slight mutations, allowing family groups to be visually tracked across generations.
-
-The lineage leaderboard shows which family groups are dominating the ecosystem.
-
-## Connection to Autonomy and Engineering
-
-This project is not yet a full autonomous vehicle simulator. However, it demonstrates several foundational ideas related to autonomy and intelligent systems:
-
-- decentralized agents
-- local sensing
-- environmental interaction
-- survival optimization
-- adaptation under constraints
-- population-level system behavior
-- emergent dynamics
-
-The long-term direction of the project is to evolve this sandbox toward more advanced autonomous-system concepts such as:
-- obstacle avoidance
-- sensor uncertainty
-- path planning
-- decision weighting
-- reinforcement learning
-- swarm coordination
+| Key | Action                      |
+| --- | --------------------------- |
+| R   | Reset simulation            |
+| H   | Toggle hazard zone          |
+| S   | Toggle sensor visualization |
+| F   | Add food                    |
+| G   | Remove food                 |
 
 ---
 
-# Current Limitations
+# Repository Structure
 
-- The simulation currently operates in 2D space.
-- Agents do not yet perform true path planning.
-- Agents do not learn from experience.
-- Hazard interaction is still relatively simple.
-- The lineage leaderboard does not yet visually map lineage IDs to colors.
-- No persistent data logging exists yet.
+```text
+autonomous-agent-sandbox/
+│
+├── main.py
+├── plot_results.py
+├── summarize_results.py
+├── data/
+├── plots/
+├── README.md
+└── .gitignore
+```
 
 ---
 
-# Near-Term Roadmap
+# Long-Term Vision
 
-## v1.9 — Lineage Color Legend
-Display lineage colors directly beside leaderboard entries for easier interpretation.
+The long-term direction of the project is to evolve into a small-scale autonomous systems experimentation framework capable of exploring:
 
-## v2.0 — Data Logging
-Save ecosystem statistics over time:
-- population
-- births
-- deaths
-- energy
-- traits
-- lineage performance
+* Sensor uncertainty
+* Risk-aware navigation
+* Multi-agent interaction
+* Decision-making under constraints
+* Adaptive behavior systems
+* Resource-aware autonomy
+* Navigation efficiency
+* Autonomous systems analytics
 
-## v2.1 — Simulation Graphs
-Generate plots showing how the ecosystem evolves over time.
+while remaining understandable, lightweight, and experimentally flexible.
 
-## v2.2 — Trait Analysis
-Analyze which inherited traits correlate with survival and reproduction.
+---
 
-## v2.3 — Advanced Autonomy Systems
-Introduce:
-- obstacle avoidance
-- sensor-based navigation
-- risk-aware movement
-- autonomous decision systems
-- environmental path planning
+# Author Notes
 
+This repository represents an ongoing engineering-learning process focused on autonomy systems, simulation architecture, and adaptive behavior experimentation.
 
+The project intentionally evolves incrementally so that each new system can be studied, analyzed, documented, and understood before additional complexity is introduced.
 
-
-*********************Temmy**************************
+The goal is not only to build the system, but also to understand the engineering concepts behind each architectural decision.
