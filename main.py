@@ -84,8 +84,11 @@ MIN_ENERGY_LOSS_RATE = 0.08
 MAX_ENERGY_LOSS_RATE = 0.25
 MIN_RISK_TOLERANCE = 0.10
 MAX_RISK_TOLERANCE = 1.00
+MIN_SENSOR_NOISE = 0.00
+MAX_SENSOR_NOISE = 1.00
 
 HAZARD_INFLUENCE_RADIUS = 120
+MAX_POSITION_NOISE_PIXELS = 45
 
 LOG_INTERVAL_FRAMES = 60
 SIMULATION_LOG_FILE = "data/simulation_log.csv"
@@ -190,24 +193,27 @@ def create_food():
             return {"x": x, "y": y}
 
 
+def perceive_food_position(agent, food):
+    noise_strength = agent["sensor_noise"] * MAX_POSITION_NOISE_PIXELS
+
+    perceived_x = food["x"] + random.gauss(0, noise_strength)
+    perceived_y = food["y"] + random.gauss(0, noise_strength)
+
+    perceived_x = clamp(perceived_x, 0, WIDTH)
+    perceived_y = clamp(perceived_y, 0, HEIGHT)
+
+    return perceived_x, perceived_y
+
+
 def create_agent(x=None, y=None, parent=None):
     global next_lineage_id, next_agent_id
 
     if parent:
         speed = mutate(parent["speed"], MUTATION_RATE, MIN_SPEED, MAX_SPEED)
         vision_radius = mutate(parent["vision_radius"], 12, MIN_VISION_RADIUS, MAX_VISION_RADIUS)
-        energy_loss_rate = mutate(
-            parent["energy_loss_rate"],
-            0.015,
-            MIN_ENERGY_LOSS_RATE,
-            MAX_ENERGY_LOSS_RATE
-        )
-        risk_tolerance = mutate(
-            parent["risk_tolerance"],
-            0.08,
-            MIN_RISK_TOLERANCE,
-            MAX_RISK_TOLERANCE
-        )
+        energy_loss_rate = mutate(parent["energy_loss_rate"], 0.015, MIN_ENERGY_LOSS_RATE, MAX_ENERGY_LOSS_RATE)
+        risk_tolerance = mutate(parent["risk_tolerance"], 0.08, MIN_RISK_TOLERANCE, MAX_RISK_TOLERANCE)
+        sensor_noise = mutate(parent["sensor_noise"], 0.08, MIN_SENSOR_NOISE, MAX_SENSOR_NOISE)
 
         color = mutate_color(parent["color"])
         lineage_id = parent["lineage_id"]
@@ -218,6 +224,7 @@ def create_agent(x=None, y=None, parent=None):
         vision_radius = random.uniform(90, 150)
         energy_loss_rate = random.uniform(0.11, 0.17)
         risk_tolerance = random.uniform(0.25, 0.75)
+        sensor_noise = random.uniform(0.05, 0.45)
 
         color = random_agent_color()
         lineage_id = next_lineage_id
@@ -241,6 +248,7 @@ def create_agent(x=None, y=None, parent=None):
         "vision_radius": vision_radius,
         "energy_loss_rate": energy_loss_rate,
         "risk_tolerance": risk_tolerance,
+        "sensor_noise": sensor_noise,
         "color": color,
         "birth_frame": frame_count
     }
@@ -268,6 +276,7 @@ def initialize_simulation_log_file():
             "average_vision",
             "average_energy_loss",
             "average_risk_tolerance",
+            "average_sensor_noise",
             "living_lineages",
             "hazard_enabled"
         ])
@@ -292,6 +301,7 @@ def initialize_agent_log_file():
             "vision_radius",
             "energy_loss_rate",
             "risk_tolerance",
+            "sensor_noise",
             "food_eaten",
             "birth_count",
             "final_energy",
@@ -321,6 +331,7 @@ def log_agent(agent, status):
             round(agent["vision_radius"], 3),
             round(agent["energy_loss_rate"], 5),
             round(agent["risk_tolerance"], 3),
+            round(agent["sensor_noise"], 3),
             agent["food_eaten"],
             agent["birth_count"],
             round(agent["energy"], 3),
@@ -359,6 +370,7 @@ def get_average_stats():
             "average_vision": 0,
             "average_energy_loss": 0,
             "average_risk_tolerance": 0,
+            "average_sensor_noise": 0,
             "living_lineages": 0
         }
 
@@ -368,6 +380,7 @@ def get_average_stats():
         "average_vision": sum(agent["vision_radius"] for agent in agents) / len(agents),
         "average_energy_loss": sum(agent["energy_loss_rate"] for agent in agents) / len(agents),
         "average_risk_tolerance": sum(agent["risk_tolerance"] for agent in agents) / len(agents),
+        "average_sensor_noise": sum(agent["sensor_noise"] for agent in agents) / len(agents),
         "living_lineages": len(set(agent["lineage_id"] for agent in agents))
     }
 
@@ -391,6 +404,7 @@ def log_simulation_data():
             round(stats["average_vision"], 3),
             round(stats["average_energy_loss"], 5),
             round(stats["average_risk_tolerance"], 3),
+            round(stats["average_sensor_noise"], 3),
             stats["living_lineages"],
             hazard_enabled
         ])
@@ -422,16 +436,16 @@ def choose_best_food(agent):
     best_score = float("-inf")
 
     for food in foods:
-        distance = math.hypot(
-            food["x"] - agent["x"],
-            food["y"] - agent["y"]
-        )
+        actual_distance = math.hypot(food["x"] - agent["x"], food["y"] - agent["y"])
 
-        if distance > agent["vision_radius"]:
+        if actual_distance > agent["vision_radius"]:
             continue
 
-        distance_score = 1 - (distance / agent["vision_radius"])
-        risk_score = hazard_risk_at_point(food["x"], food["y"])
+        perceived_x, perceived_y = perceive_food_position(agent, food)
+        perceived_distance = math.hypot(perceived_x - agent["x"], perceived_y - agent["y"])
+
+        distance_score = 1 - clamp(perceived_distance / agent["vision_radius"], 0, 1)
+        risk_score = hazard_risk_at_point(perceived_x, perceived_y)
         risk_penalty = risk_score * (1 - agent["risk_tolerance"])
 
         energy_urgency = 1 - clamp(agent["energy"] / STARTING_ENERGY, 0, 1)
@@ -441,7 +455,11 @@ def choose_best_food(agent):
 
         if score > best_score:
             best_score = score
-            best_food = food
+            best_food = {
+                "actual": food,
+                "perceived_x": perceived_x,
+                "perceived_y": perceived_y
+            }
 
     return best_food
 
@@ -503,6 +521,7 @@ def draw_stats():
         f"Avg Vision: {stats_data['average_vision']:.1f}",
         f"Avg Energy Loss: {stats_data['average_energy_loss']:.3f}",
         f"Avg Risk Tolerance: {stats_data['average_risk_tolerance']:.2f}",
+        f"Avg Sensor Noise: {stats_data['average_sensor_noise']:.2f}",
         "",
         "Top Lineages:"
     ]
@@ -612,8 +631,8 @@ while running:
         move_y = agent["dy"]
 
         if target_food:
-            direction_x = target_food["x"] - agent["x"]
-            direction_y = target_food["y"] - agent["y"]
+            direction_x = target_food["perceived_x"] - agent["x"]
+            direction_y = target_food["perceived_y"] - agent["y"]
 
             food_dx, food_dy = normalize_vector(
                 direction_x,
