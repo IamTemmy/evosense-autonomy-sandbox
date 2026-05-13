@@ -31,6 +31,13 @@ def summarize_group(label, group):
     print(f"Avg Speed: {group['speed'].mean():.3f}")
     print(f"Avg Vision Radius: {group['vision_radius'].mean():.3f}")
     print(f"Avg Energy Loss Rate: {group['energy_loss_rate'].mean():.5f}")
+
+    if "risk_tolerance" in group.columns:
+        print(f"Avg Risk Tolerance: {group['risk_tolerance'].mean():.3f}")
+
+    if "sensor_noise" in group.columns:
+        print(f"Avg Sensor Noise: {group['sensor_noise'].mean():.3f}")
+
     print(f"Avg Food Eaten: {group['food_eaten'].mean():.2f}")
     print(f"Avg Birth Count: {group['birth_count'].mean():.2f}")
     print(f"Avg Final Energy: {group['final_energy'].mean():.2f}")
@@ -95,24 +102,42 @@ print(f"Avg Speed: {start_speed:.2f} → {end_speed:.2f}")
 print(f"Avg Vision: {start_vision:.2f} → {end_vision:.2f}")
 print(f"Avg Energy Loss: {start_energy_loss:.4f} → {end_energy_loss:.4f}")
 
+if "average_risk_tolerance" in simulation_data.columns:
+    start_risk = simulation_data["average_risk_tolerance"].iloc[0]
+    end_risk = simulation_data["average_risk_tolerance"].iloc[-1]
+    print(f"Avg Risk Tolerance: {start_risk:.3f} → {end_risk:.3f}")
+
+if "average_sensor_noise" in simulation_data.columns:
+    start_noise = simulation_data["average_sensor_noise"].iloc[0]
+    end_noise = simulation_data["average_sensor_noise"].iloc[-1]
+    print(f"Avg Sensor Noise: {start_noise:.3f} → {end_noise:.3f}")
+
 print_section("Lineages")
 print(f"Living Lineages: {start_lineages} → {end_lineages}")
 
 if "lineage_id" in agent_data.columns:
+    aggregation_fields = {
+        "total_agents": ("agent_id", "count"),
+        "survivors": ("status", lambda x: (x == "survived").sum()),
+        "deaths": ("status", lambda x: (x == "died").sum()),
+        "avg_speed": ("speed", "mean"),
+        "avg_vision": ("vision_radius", "mean"),
+        "avg_energy_loss": ("energy_loss_rate", "mean"),
+        "avg_food_eaten": ("food_eaten", "mean"),
+        "avg_birth_count": ("birth_count", "mean"),
+        "avg_lifespan": ("lifespan_seconds", "mean")
+    }
+
+    if "risk_tolerance" in agent_data.columns:
+        aggregation_fields["avg_risk_tolerance"] = ("risk_tolerance", "mean")
+
+    if "sensor_noise" in agent_data.columns:
+        aggregation_fields["avg_sensor_noise"] = ("sensor_noise", "mean")
+
     lineage_summary = (
         agent_data
         .groupby("lineage_id")
-        .agg(
-            total_agents=("agent_id", "count"),
-            survivors=("status", lambda x: (x == "survived").sum()),
-            deaths=("status", lambda x: (x == "died").sum()),
-            avg_speed=("speed", "mean"),
-            avg_vision=("vision_radius", "mean"),
-            avg_energy_loss=("energy_loss_rate", "mean"),
-            avg_food_eaten=("food_eaten", "mean"),
-            avg_birth_count=("birth_count", "mean"),
-            avg_lifespan=("lifespan_seconds", "mean")
-        )
+        .agg(**aggregation_fields)
         .sort_values(by=["survivors", "total_agents"], ascending=False)
     )
 
@@ -122,7 +147,7 @@ if "lineage_id" in agent_data.columns:
     top_lineages = lineage_summary.head(5)
 
     for lineage_id, row in top_lineages.iterrows():
-        print(
+        line = (
             f"Lineage {lineage_id}: "
             f"{int(row['survivors'])} survivors, "
             f"{int(row['deaths'])} deaths, "
@@ -130,6 +155,14 @@ if "lineage_id" in agent_data.columns:
             f"avg vision {row['avg_vision']:.1f}, "
             f"avg energy loss {row['avg_energy_loss']:.4f}"
         )
+
+        if "avg_risk_tolerance" in row:
+            line += f", avg risk {row['avg_risk_tolerance']:.3f}"
+
+        if "avg_sensor_noise" in row:
+            line += f", avg noise {row['avg_sensor_noise']:.3f}"
+
+        print(line)
 
 print_section("Survivor Trait Profile")
 summarize_group("Surviving Agents", survivors)
@@ -160,6 +193,16 @@ if not survivors.empty and not dead_agents.empty:
     print(f"Energy Loss Difference: survivors {survivor_energy_loss:.5f} vs dead {dead_energy_loss:.5f}")
     print(f"Food Eaten Difference: survivors {survivor_food:.2f} vs dead {dead_food:.2f}")
     print(f"Birth Count Difference: survivors {survivor_births:.2f} vs dead {dead_births:.2f}")
+
+    if "risk_tolerance" in agent_data.columns:
+        survivor_risk = survivors["risk_tolerance"].mean()
+        dead_risk = dead_agents["risk_tolerance"].mean()
+        print(f"Risk Tolerance Difference: survivors {survivor_risk:.3f} vs dead {dead_risk:.3f}")
+
+    if "sensor_noise" in agent_data.columns:
+        survivor_noise = survivors["sensor_noise"].mean()
+        dead_noise = dead_agents["sensor_noise"].mean()
+        print(f"Sensor Noise Difference: survivors {survivor_noise:.3f} vs dead {dead_noise:.3f}")
 else:
     print("Not enough survivor/death contrast for comparison.")
 
@@ -173,6 +216,32 @@ if not dead_agents.empty and "died_in_hazard" in dead_agents.columns:
     print(f"Percent of Deaths Inside Hazard: {hazard_death_rate:.1f}%")
 else:
     print("No dead agents recorded or hazard data unavailable.")
+
+print_section("Sensor Noise Analysis")
+
+if "sensor_noise" in agent_data.columns:
+    lowest_noise_agents = agent_data.nsmallest(5, "sensor_noise")
+    highest_noise_agents = agent_data.nlargest(5, "sensor_noise")
+
+    print("Lowest-Noise Agents")
+    print(f"Avg Lifespan: {lowest_noise_agents['lifespan_seconds'].mean():.2f} seconds")
+    print(f"Avg Food Eaten: {lowest_noise_agents['food_eaten'].mean():.2f}")
+    print(f"Avg Birth Count: {lowest_noise_agents['birth_count'].mean():.2f}")
+
+    print("\nHighest-Noise Agents")
+    print(f"Avg Lifespan: {highest_noise_agents['lifespan_seconds'].mean():.2f} seconds")
+    print(f"Avg Food Eaten: {highest_noise_agents['food_eaten'].mean():.2f}")
+    print(f"Avg Birth Count: {highest_noise_agents['birth_count'].mean():.2f}")
+
+    if not survivors.empty and not dead_agents.empty:
+        if survivor_noise < dead_noise:
+            print("\nSurvivors had lower sensor noise on average, suggesting perception accuracy helped survival.")
+        elif survivor_noise > dead_noise:
+            print("\nSurvivors had higher sensor noise on average, suggesting other traits outweighed perception accuracy in this run.")
+        else:
+            print("\nSensor noise was similar between survivors and dead agents.")
+else:
+    print("Sensor noise data unavailable. Run the latest main.py first.")
 
 print_section("Interpretation")
 
@@ -208,3 +277,9 @@ if not survivors.empty and not dead_agents.empty:
 
     if survivor_food > dead_food:
         print("Survivors ate more food on average, suggesting food access was a major survival factor.")
+
+    if "sensor_noise" in agent_data.columns:
+        if survivor_noise < dead_noise:
+            print("Lower sensor noise appears beneficial in this run, likely because more accurate perception improved food targeting.")
+        elif survivor_noise > dead_noise:
+            print("Higher sensor noise did not prevent survival in this run, suggesting environment layout or other traits were more important.")
