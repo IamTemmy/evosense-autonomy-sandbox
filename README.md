@@ -470,3 +470,87 @@ This repository represents an ongoing engineering-learning process focused on au
 The project intentionally evolves incrementally so that each new system can be studied, analyzed, documented, and understood before additional complexity is introduced.
 
 The goal is not only to build the system, but also to understand the engineering concepts behind each architectural decision.
+
+## Modular Architecture
+
+The project has been refactored into multiple files to improve readability, maintainability, and engineering structure.
+
+### `main.py`
+Main simulation entry point.
+
+Responsible for:
+- parsing command-line preset arguments
+- initializing the simulation
+- running the main loop
+- coordinating agents, environment, logging, and visualization
+
+### `config.py`
+Stores shared configuration values.
+
+Includes:
+- screen size
+- frame rate
+- experiment presets
+- agent constants
+- mutation limits
+- colors
+- file paths
+
+### `agents.py`
+Handles agent behavior and traits.
+
+Includes:
+- agent creation
+- trait inheritance
+- mutation
+- sensor noise
+- risk-aware food selection
+- hazard avoidance movement
+
+### `environment.py`
+Handles environment-related logic.
+
+Includes:
+- food creation
+- hazard calculations
+- hazard risk estimation
+- environment geometry helpers
+
+### `logging_system.py`
+Handles experiment telemetry.
+
+Includes:
+- simulation log initialization
+- agent log initialization
+- population-level logging
+- agent-level survival/death logging
+
+### `visualization.py`
+Handles rendering and dashboard display.
+
+Includes:
+- drawing agents
+- drawing food
+- drawing hazards
+- drawing sensor radius overlays
+- drawing simulation statistics
+
+### `plot_results.py`
+Generates visual plots from simulation logs.
+
+Includes:
+- population plots
+- energy plots
+- births/deaths plots
+- trait evolution plots
+- sensor noise plots
+
+### `summarize_results.py`
+Generates a terminal-based experiment summary.
+
+Includes:
+- population analysis
+- survivor vs dead-agent comparison
+- lineage analysis
+- sensor noise analysis
+- interpretation of experiment outcomes
