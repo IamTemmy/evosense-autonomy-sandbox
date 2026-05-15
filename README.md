@@ -1,395 +1,198 @@
-# Autonomous Agent Sandbox
+# EvoSense: Bio-Inspired Autonomy Sandbox
 
-A lightweight simulation framework for studying autonomous-agent behavior under environmental constraints, imperfect sensing, adaptive traits, and risk-aware navigation.
-
----
-
-## Overview
-
-Autonomous Agent Sandbox is an experimental simulation platform designed to model how independent agents behave inside constrained environments.
-
-The project began as a simple survival and adaptation simulation inspired by biological systems. Over time, it evolved into a broader autonomy systems sandbox focused on engineering-oriented concepts such as:
-
-* Sensor-driven behavior
-* Environmental risk assessment
-* Energy-aware navigation
-* Autonomous decision-making
-* Adaptive trait evolution
-* Experiment telemetry and analytics
-* Navigation under uncertainty
-
-The purpose of the project is not to recreate a full autonomous vehicle stack or a commercial robotics simulator. Instead, the goal is to study and visualize foundational principles that appear in real-world autonomy systems at a smaller and understandable scale.
-
-The simulation serves as a controlled environment where agent behavior, sensing limitations, environmental pressure, and navigation strategies can be explored experimentally.
+An interpretable simulation of evolving agents adapting under risk, energy pressure, sensor noise, and environmental uncertainty.
 
 ---
 
-# Project Identity
+## Project Identity
 
-Autonomous Agent Sandbox is now positioned as:
+EvoSense is a lightweight Python/Pygame simulation for studying how simple agents adapt survival behavior under energy pressure, environmental hazards, imperfect sensing, and inherited traits.
 
-> A lightweight simulation framework for studying autonomous-agent behavior, environmental constraints, sensor-driven navigation, and adaptive decision-making.
+The project uses a biological survival metaphor: agents seek food, avoid hazards, lose energy, reproduce, mutate, and form lineages. Beneath that biological framing, EvoSense explores engineering-relevant autonomy concepts such as perception uncertainty, risk-aware decision-making, adaptive behavior, sensor limitations, and telemetry-driven analysis.
 
-The project draws inspiration from engineering domains including:
+The recommended repository name for a future GitHub rename is:
 
-* Autonomous vehicles
-* Robotics
-* Swarm systems
-* Embedded sensing systems
-* Navigation under uncertainty
-* Adaptive decision architectures
-* Resource-constrained autonomous systems
+```text
+evosense-autonomy-sandbox
+```
 
-As the project evolves, new features are evaluated based on whether they represent meaningful autonomy or systems-engineering concepts rather than purely visual or game-like additions.
+EvoSense should be understood as a bio-inspired autonomy sandbox, not a vehicle autonomy simulator. A separate future project can focus directly on vehicle or robotics autonomy.
 
 ---
 
-# Core Engineering Concepts
+## What This Project Is
 
-The project focuses on several engineering principles commonly found in autonomous systems.
-
-## 1. Environmental Constraints
-
-Agents operate inside environments containing:
-
-* Limited resources
-* Hazardous regions
-* Energy constraints
-* Competition for survival
-
-This models how autonomous systems must function within imperfect and constrained real-world environments.
+* A bio-inspired autonomy simulation.
+* An agent-based modeling project.
+* A portfolio project for demonstrating engineering thinking around autonomy, uncertainty, and adaptive behavior.
+* A lightweight experimentation framework for testing how simple decision rules affect survival and population behavior.
+* A project that prioritizes interpretability, documentation, and measurable behavior over unnecessary complexity.
 
 ---
 
-## 2. Sensor-Driven Behavior
+## What This Project Is Not
 
-Agents rely on sensing ranges to detect resources and navigate the environment.
-
-The simulation models:
-
-* Detection radius
-* Sensor limitations
-* Imperfect perception
-* Environmental awareness
-
-This parallels how robotics and autonomous systems depend on sensor inputs such as:
-
-* Cameras
-* Radar
-* LiDAR
-* GPS
-* Embedded sensing systems
+* Not a vehicle autonomy simulator.
+* Not a neural network or deep reinforcement learning project.
+* Not a polished commercial game.
+* Not a full robotics stack.
+* Not a project meant to simulate realistic biology in scientific detail.
 
 ---
 
-## 3. Risk-Aware Navigation
+## Design Philosophy
 
-Agents evaluate:
-
-* Resource reward
-* Hazard proximity
-* Survival tradeoffs
-* Energy efficiency
-
-This approximates real-world autonomous decision-making where systems balance:
-
-* Safety
-* Efficiency
-* Speed
-* Navigation quality
-* Energy usage
+* Engineering realism over flashy features.
+* Interpretability over black-box complexity.
+* One meaningful autonomy layer at a time.
+* Clear documentation after every major feature.
+* Simple, readable code.
+* Measurable behavior through logs and plots.
 
 ---
 
-## 4. Adaptive Traits
+## Current Features
 
-Agents possess inheritable traits such as:
+### Environment and Simulation
 
-* Speed
-* Vision radius
-* Energy efficiency
-* Risk tolerance
+* Configurable environment presets.
+* Food/resource spawning.
+* Hazard zones.
+* Environmental pressure through scarcity, hazards, and energy loss.
+* Reset and runtime controls for simulation interaction.
 
-Traits mutate across generations, allowing different behavioral strategies to emerge over time.
+### Agent Behavior
 
-This models adaptive behavior systems and evolutionary optimization concepts.
+* Independent agents with position, velocity, and energy.
+* Dynamic movement behavior.
+* Food/resource seeking.
+* Energy-based survival.
+* Reproduction system.
+* Hazard avoidance movement.
+* Risk-aware food selection.
 
----
+### Bio-Inspired Evolution
 
-## 5. Telemetry and Experimentation
+* Inheritable traits.
+* Trait mutation across generations.
+* Speed variation.
+* Vision radius variation.
+* Energy efficiency variation.
+* Risk tolerance variation.
+* Lineage tracking.
+* Emergent survival strategies.
 
-The system records:
+### Autonomy and Perception
 
-* Population changes
-* Energy trends
-* Trait evolution
-* Survival statistics
-* Birth and death metrics
-* Lineage information
-* Agent-level data
+* Vision radius sensing.
+* Sensor noise.
+* Imperfect perception.
+* Sensor visualization mode.
+* Environmental awareness.
+* Risk-based movement logic.
+* Navigation under uncertainty.
 
-This creates an experimentation workflow similar to simulation and analytics pipelines used in engineering research.
+### Analytics and Interpretability
 
----
-
-# Current Features
-
-## Agent Simulation
-
-* Independent autonomous agents
-* Dynamic movement behavior
-* Food/resource seeking
-* Energy-based survival
-* Reproduction system
-* Trait inheritance and mutation
-
----
-
-## Environmental Systems
-
-* Hazard zones
-* Configurable environments
-* Resource spawning
-* Environmental pressure
-* Risk-aware navigation
-
----
-
-## Sensor Systems
-
-* Vision radius sensing
-* Sensor visualization mode
-* Environmental awareness
-* Risk-based movement logic
+* Simulation logging.
+* Agent-level telemetry.
+* Population analysis.
+* Trait analysis.
+* Survival summaries.
+* Birth and death metrics.
+* Lineage analysis.
+* Sensor noise analysis.
+* Plot generation.
 
 ---
 
-## Adaptive Systems
+## Core Concepts
 
-* Evolutionary trait mutation
-* Risk tolerance behavior
-* Emergent survival strategies
-* Lineage tracking
+### Energy Pressure
 
----
+Agents lose energy as they move and survive by finding food. This creates a simple but measurable pressure that shapes survival, reproduction, and population behavior.
 
-## Data Logging and Analytics
+### Environmental Risk
 
-* Simulation logging
-* Agent-level telemetry
-* Population analysis
-* Trait analysis
-* Survival summaries
-* Plot generation
+Hazards introduce danger into the environment. Agents must balance the reward of nearby resources against the risk of entering or approaching hazardous regions.
 
----
+### Imperfect Sensing
 
-# Current Architecture
+Agents do not operate with perfect knowledge. Vision radius and sensor noise create perception limits that affect food targeting, hazard avoidance, and survival outcomes.
 
-The project currently operates through several primary systems.
+### Inherited Traits
 
-## Simulation Engine
+Agents pass traits to offspring with mutation. Over time, population behavior can shift as different trait combinations survive under different environmental presets.
 
-Handles:
+### Telemetry-Driven Analysis
 
-* Frame updates
-* Agent movement
-* Environment interaction
-* Rendering
-* Event handling
+The project records population trends, energy values, trait distributions, survival outcomes, lineage data, and sensor-noise effects so behavior can be inspected after each run.
 
 ---
 
-## Agent System
+## Experiment Presets
 
-Each agent contains:
-
-* Position
-* Velocity
-* Energy
-* Sensor radius
-* Risk tolerance
-* Movement logic
-* Evolutionary traits
-
----
-
-## Navigation Logic
-
-Agents:
-
-* Search for resources
-* Evaluate hazard risk
-* Move according to sensed information
-* Balance reward versus danger
-
----
-
-## Analytics Pipeline
-
-The simulation exports:
-
-* CSV experiment logs
-* Agent-level data
-* Plots and summaries
-
-This allows experiment analysis after each run.
-
----
-
-# Experiment Presets
-
-The simulation currently supports multiple environment presets.
-
-## Balanced
+### Balanced
 
 General-purpose environment with moderate:
 
-* Food availability
-* Hazard pressure
-* Reproduction difficulty
+* Food availability.
+* Hazard pressure.
+* Reproduction difficulty.
 
----
-
-## Scarce
+### Scarce
 
 Resource-limited environment.
 
 Encourages:
 
-* Competition
-* Efficient navigation
-* Conservative behavior
+* Competition.
+* Efficient navigation.
+* Conservative behavior.
 
----
-
-## Abundant
+### Abundant
 
 High-resource environment.
 
 Encourages:
 
-* Rapid reproduction
-* Larger populations
-* Reduced survival pressure
+* Rapid reproduction.
+* Larger populations.
+* Reduced survival pressure.
 
----
-
-## Harsh
+### Harsh
 
 High-risk environment.
 
 Encourages:
 
-* Strong survival pressure
-* Risk-sensitive navigation
-* Efficient energy usage
+* Strong survival pressure.
+* Risk-sensitive navigation.
+* Efficient energy usage.
 
 ---
 
-# Current Project Status
+## Running the Simulation
 
-The project is transitioning from:
-
-```text
-simple adaptation simulation
-```
-
-toward:
-
-```text
-autonomous systems experimentation framework
-```
-
-The system currently demonstrates:
-
-* Sensor-based movement
-* Risk-aware navigation
-* Environmental adaptation
-* Emergent behavior
-* Autonomous survival strategies
-
-Future development will focus on:
-
-* Imperfect sensing
-* Sensor noise
-* Navigation under uncertainty
-* Multi-agent interaction
-* Dynamic obstacles
-* Modular architecture
-* Advanced telemetry
-* Potential reinforcement-learning integration
-
----
-
-# Important Clarification
-
-This project is NOT currently a machine-learning system.
-
-The simulation does not yet use:
-
-* Neural networks
-* Reinforcement learning
-* Model training
-* Gradient descent
-* Learned policies
-
-Instead, the project currently focuses on:
-
-* Autonomous systems architecture
-* Agent-based behavior
-* Environmental interaction
-* Adaptive traits
-* Sensor-driven navigation
-* Decision systems under constraints
-
-Future versions may introduce machine-learning components once the autonomy and simulation foundation becomes more mature.
-
----
-
-# Why This Project Matters
-
-This project is designed to strengthen understanding of:
-
-* Systems thinking
-* Autonomous behavior
-* Navigation logic
-* Environmental interaction
-* Engineering tradeoffs
-* Simulation workflows
-* Telemetry analysis
-* Adaptive systems
-
-The project is intended to function both as:
-
-* a technical learning platform
-* and a portfolio-quality engineering project
-
-that demonstrates structured experimentation and autonomous systems reasoning.
-
----
-
-# Running the Simulation
-
-## Run Balanced Preset
+### Run Balanced Preset
 
 ```bash
 python3 main.py --preset balanced
 ```
 
-## Run Scarce Preset
+### Run Scarce Preset
 
 ```bash
 python3 main.py --preset scarce
 ```
 
-## Run Abundant Preset
+### Run Abundant Preset
 
 ```bash
 python3 main.py --preset abundant
 ```
 
-## Run Harsh Preset
+### Run Harsh Preset
 
 ```bash
 python3 main.py --preset harsh
@@ -397,7 +200,7 @@ python3 main.py --preset harsh
 
 ---
 
-# Generate Experiment Plots
+## Generate Experiment Plots
 
 ```bash
 python3 plot_results.py
@@ -405,7 +208,7 @@ python3 plot_results.py
 
 ---
 
-# Generate Experiment Summary
+## Generate Experiment Summary
 
 ```bash
 python3 summarize_results.py
@@ -413,7 +216,7 @@ python3 summarize_results.py
 
 ---
 
-# Controls
+## Controls
 
 | Key | Action                      |
 | --- | --------------------------- |
@@ -425,11 +228,129 @@ python3 summarize_results.py
 
 ---
 
-# Repository Structure
+## Version Roadmap
+
+* v1.0 — Basic Agent Simulation
+* v2.0 — Evolutionary Behavior and Lineage
+* v3.0 — Risk-Aware Survival
+* v3.1 — Sensor Noise and Imperfect Perception
+* v3.2 — Sensor Noise Analytics
+* v3.3 — Sensor Noise Visualization
+* v3.4 — Modular Architecture Refactor
+* v3.5 — Confidence-Aware Foraging
+* v3.6 — Agent Memory of Risk and Reward
+* v3.7 — Experiment Comparison Mode
+* v4.0 — Portfolio Release
+
+---
+
+## Current Architecture
+
+The project has been refactored into multiple files to improve readability, maintainability, and engineering structure.
+
+### `main.py`
+
+Main simulation entry point.
+
+Responsible for:
+
+* Parsing command-line preset arguments.
+* Initializing the simulation.
+* Running the main loop.
+* Coordinating agents, environment, logging, and visualization.
+
+### `config.py`
+
+Stores shared configuration values.
+
+Includes:
+
+* Screen size.
+* Frame rate.
+* Experiment presets.
+* Agent constants.
+* Mutation limits.
+* Colors.
+* File paths.
+
+### `agents.py`
+
+Handles agent behavior and traits.
+
+Includes:
+
+* Agent creation.
+* Trait inheritance.
+* Mutation.
+* Sensor noise.
+* Risk-aware food selection.
+* Hazard avoidance movement.
+
+### `environment.py`
+
+Handles environment-related logic.
+
+Includes:
+
+* Food creation.
+* Hazard calculations.
+* Hazard risk estimation.
+* Environment geometry helpers.
+
+### `logging_system.py`
+
+Handles experiment telemetry.
+
+Includes:
+
+* Simulation log initialization.
+* Agent log initialization.
+* Population-level logging.
+* Agent-level survival/death logging.
+
+### `visualization.py`
+
+Handles rendering and dashboard display.
+
+Includes:
+
+* Drawing agents.
+* Drawing food.
+* Drawing hazards.
+* Drawing sensor radius overlays.
+* Drawing simulation statistics.
+
+### `plot_results.py`
+
+Generates visual plots from simulation logs.
+
+Includes:
+
+* Population plots.
+* Energy plots.
+* Births/deaths plots.
+* Trait evolution plots.
+* Sensor noise plots.
+
+### `summarize_results.py`
+
+Generates a terminal-based experiment summary.
+
+Includes:
+
+* Population analysis.
+* Survivor vs dead-agent comparison.
+* Lineage analysis.
+* Sensor noise analysis.
+* Interpretation of experiment outcomes.
+
+---
+
+## Repository Structure
 
 ```text
-autonomous-agent-sandbox/
-│
+evosense-autonomy-sandbox/
+|
 ├── main.py
 ├── config.py
 ├── agents.py
@@ -446,111 +367,10 @@ autonomous-agent-sandbox/
 
 ---
 
-# Long-Term Vision
+## Future Direction
 
-The long-term direction of the project is to evolve into a small-scale autonomous systems experimentation framework capable of exploring:
+EvoSense will remain focused on bio-inspired autonomy: simple agents, interpretable rules, imperfect sensing, environmental risk, energy pressure, inherited traits, and measurable population behavior.
 
-* Sensor uncertainty
-* Risk-aware navigation
-* Multi-agent interaction
-* Decision-making under constraints
-* Adaptive behavior systems
-* Resource-aware autonomy
-* Navigation efficiency
-* Autonomous systems analytics
+A separate future project can focus directly on vehicle or robotics autonomy with domain-specific concerns such as maps, trajectories, controllers, sensors, planning stacks, and hardware-oriented constraints. Keeping that work separate allows EvoSense to stay lightweight, readable, and focused on the survival metaphor that makes its behavior easy to inspect.
 
-while remaining understandable, lightweight, and experimentally flexible.
-
----
-
-# Author Notes
-
-This repository represents an ongoing engineering-learning process focused on autonomy systems, simulation architecture, and adaptive behavior experimentation.
-
-The project intentionally evolves incrementally so that each new system can be studied, analyzed, documented, and understood before additional complexity is introduced.
-
-The goal is not only to build the system, but also to understand the engineering concepts behind each architectural decision.
-
-## Modular Architecture
-
-The project has been refactored into multiple files to improve readability, maintainability, and engineering structure.
-
-### `main.py`
-Main simulation entry point.
-
-Responsible for:
-- parsing command-line preset arguments
-- initializing the simulation
-- running the main loop
-- coordinating agents, environment, logging, and visualization
-
-### `config.py`
-Stores shared configuration values.
-
-Includes:
-- screen size
-- frame rate
-- experiment presets
-- agent constants
-- mutation limits
-- colors
-- file paths
-
-### `agents.py`
-Handles agent behavior and traits.
-
-Includes:
-- agent creation
-- trait inheritance
-- mutation
-- sensor noise
-- risk-aware food selection
-- hazard avoidance movement
-
-### `environment.py`
-Handles environment-related logic.
-
-Includes:
-- food creation
-- hazard calculations
-- hazard risk estimation
-- environment geometry helpers
-
-### `logging_system.py`
-Handles experiment telemetry.
-
-Includes:
-- simulation log initialization
-- agent log initialization
-- population-level logging
-- agent-level survival/death logging
-
-### `visualization.py`
-Handles rendering and dashboard display.
-
-Includes:
-- drawing agents
-- drawing food
-- drawing hazards
-- drawing sensor radius overlays
-- drawing simulation statistics
-
-### `plot_results.py`
-Generates visual plots from simulation logs.
-
-Includes:
-- population plots
-- energy plots
-- births/deaths plots
-- trait evolution plots
-- sensor noise plots
-
-### `summarize_results.py`
-Generates a terminal-based experiment summary.
-
-Includes:
-- population analysis
-- survivor vs dead-agent comparison
-- lineage analysis
-- sensor noise analysis
-- interpretation of experiment outcomes
+Near-term EvoSense development should continue adding one meaningful autonomy layer at a time, with documentation and analytics updated after each major feature.
