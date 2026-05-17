@@ -106,6 +106,7 @@ EvoSense should be understood as a bio-inspired autonomy sandbox, not a vehicle 
 * Lineage analysis.
 * Sensor noise analysis.
 * Confidence-aware foraging analysis.
+* v3.5.1 validation comparison and more cautious confidence/hazard interpretation.
 * Plot generation.
 
 ---
@@ -222,6 +223,12 @@ python3 plot_results.py
 python3 summarize_results.py
 ```
 
+### Compare v3.5 Validation Presets
+
+```bash
+python3 compare_validation_runs.py
+```
+
 ---
 
 ## Controls
@@ -246,6 +253,7 @@ python3 summarize_results.py
 * v3.3 — Sensor Noise Visualization
 * v3.4 — Modular Architecture Refactor
 * v3.5 — Confidence-Aware Foraging (implemented)
+* v3.5.1 — Validation Interpretation Cleanup (implemented)
 * v3.6 — Agent Memory of Risk and Reward
 * v3.7 — Experiment Comparison Mode
 * v4.0 — Portfolio Release

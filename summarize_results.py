@@ -2,6 +2,7 @@ import pandas as pd
 
 SIMULATION_LOG_FILE = "data/simulation_log.csv"
 AGENT_LOG_FILE = "data/agent_log.csv"
+MEANINGFUL_CONFIDENCE_DIFFERENCE = 0.02
 
 simulation_data = pd.read_csv(SIMULATION_LOG_FILE)
 agent_data = pd.read_csv(AGENT_LOG_FILE)
@@ -243,6 +244,7 @@ if not survivors.empty and not dead_agents.empty:
     if "average_selected_target_confidence" in agent_data.columns:
         survivor_confidence = survivors["average_selected_target_confidence"].mean()
         dead_confidence = dead_agents["average_selected_target_confidence"].mean()
+        selected_confidence_difference = survivor_confidence - dead_confidence
         print(f"Selected Confidence Difference: survivors {survivor_confidence:.3f} vs dead {dead_confidence:.3f}")
 else:
     print("Not enough survivor/death contrast for comparison.")
@@ -255,6 +257,14 @@ if not dead_agents.empty and "died_in_hazard" in dead_agents.columns:
 
     print(f"Deaths Inside Hazard: {len(hazard_deaths)}")
     print(f"Percent of Deaths Inside Hazard: {hazard_death_rate:.1f}%")
+
+    if "hazard_enabled" in simulation_data.columns:
+        hazard_enabled_steps = simulation_data["hazard_enabled"].sum()
+        print(f"Hazard Enabled Samples: {hazard_enabled_steps} of {len(simulation_data)}")
+
+    print("Hazard impact note: zero deaths inside the hazard does not prove the hazard had no effect.")
+    print("Current logs track death location, but not hazard exposure time or accumulated hazard energy penalty.")
+    print("Future versions should track hazard exposure time to separate avoidance effects from direct hazard deaths.")
 else:
     print("No dead agents recorded or hazard data unavailable.")
 
@@ -361,7 +371,9 @@ if not survivors.empty and not dead_agents.empty:
             print("Higher sensor noise did not prevent survival in this run, suggesting environment layout or other traits were more important.")
 
     if "average_selected_target_confidence" in agent_data.columns:
-        if survivor_confidence > dead_confidence:
-            print("Survivors selected higher-confidence food targets on average, suggesting confidence-aware foraging improved survival.")
-        elif survivor_confidence < dead_confidence:
+        if selected_confidence_difference >= MEANINGFUL_CONFIDENCE_DIFFERENCE:
+            print("Survivors selected meaningfully higher-confidence food targets on average, suggesting confidence may have helped survival in this run.")
+        elif selected_confidence_difference <= -MEANINGFUL_CONFIDENCE_DIFFERENCE:
             print("Survivors selected lower-confidence targets on average, suggesting hunger, risk tolerance, or food layout outweighed confidence in this run.")
+        else:
+            print("Selected-target confidence was similar for survivors and dead agents, suggesting other traits or environmental pressure likely dominated survival outcomes.")
