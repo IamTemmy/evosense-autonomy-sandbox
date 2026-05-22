@@ -93,6 +93,7 @@ EvoSense simplifies those ideas into an interpretable simulation. Instead of mod
 - Sensor noise plots.
 - Confidence-aware foraging plots.
 - Hazard-death metrics.
+- Hazard exposure metrics.
 - Summary reports.
 - Modular architecture and documentation.
 
@@ -168,6 +169,14 @@ Code organization improvements that separate simulation configuration, environme
 ### v3.5 - Confidence-Aware Foraging
 
 Implemented feature. Agents estimate confidence in perceived food locations and use that confidence when selecting targets under noise, distance, energy pressure, and hazard risk.
+
+### v3.5.1 - Validation Interpretation Cleanup
+
+Implemented feature. Validation comparison and summary interpretation were updated to avoid overstating confidence effects and to clarify that zero hazard deaths do not prove hazards had no effect.
+
+### v3.5.2 - Hazard Exposure Analytics
+
+Implemented feature. The hazard zone now logs exposure steps, accumulated hazard energy penalties, hazard entries, and survivor-versus-dead exposure comparisons so hazard effects can be measured even when agents leave the hazard before dying.
 
 ### v3.6 - Agent Memory of Risk and Reward
 

@@ -196,6 +196,10 @@ def create_agent(environment, x=None, y=None, parent=None):
         "last_selected_confidence": None,
         "low_confidence_decisions": 0,
         "high_confidence_decisions": 0,
+        "hazard_exposure_steps": 0,
+        "total_hazard_energy_penalty": 0,
+        "times_entered_hazard": 0,
+        "currently_inside_hazard": False,
         "color": color,
         "birth_frame": environment.frame_count
     }

@@ -30,6 +30,12 @@ def initialize_simulation_log_file():
             "low_confidence_decisions",
             "high_confidence_decisions",
             "living_lineages",
+            "total_hazard_exposure_steps",
+            "average_hazard_exposure_steps",
+            "total_hazard_energy_penalty",
+            "average_hazard_energy_penalty",
+            "total_hazard_entries",
+            "agents_inside_hazard",
             "hazard_enabled"
         ])
 
@@ -61,6 +67,9 @@ def initialize_agent_log_file():
             "death_x",
             "death_y",
             "died_in_hazard",
+            "hazard_exposure_steps",
+            "total_hazard_energy_penalty",
+            "times_entered_hazard",
             "average_perception_confidence",
             "average_selected_target_confidence",
             "low_confidence_decisions",
@@ -106,6 +115,9 @@ def log_agent(environment, agent, status):
             round(agent["x"], 2),
             round(agent["y"], 2),
             died_in_hazard,
+            agent["hazard_exposure_steps"],
+            round(agent["total_hazard_energy_penalty"], 3),
+            agent["times_entered_hazard"],
             round(average_perception_confidence, 3),
             round(average_selected_target_confidence, 3),
             agent["low_confidence_decisions"],
@@ -144,5 +156,11 @@ def log_simulation_data(environment):
             stats["low_confidence_decisions"],
             stats["high_confidence_decisions"],
             stats["living_lineages"],
+            stats["total_hazard_exposure_steps"],
+            round(stats["average_hazard_exposure_steps"], 3),
+            round(stats["total_hazard_energy_penalty"], 3),
+            round(stats["average_hazard_energy_penalty"], 3),
+            stats["total_hazard_entries"],
+            stats["agents_inside_hazard"],
             environment.hazard_enabled
         ])

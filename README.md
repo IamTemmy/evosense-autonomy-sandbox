@@ -106,6 +106,7 @@ EvoSense should be understood as a bio-inspired autonomy sandbox, not a vehicle 
 * Lineage analysis.
 * Sensor noise analysis.
 * Confidence-aware foraging analysis.
+* Hazard exposure analytics.
 * v3.5.1 validation comparison and more cautious confidence/hazard interpretation.
 * Plot generation.
 
@@ -120,6 +121,8 @@ Agents lose energy as they move and survive by finding food. This creates a simp
 ### Environmental Risk
 
 Hazards introduce danger into the environment. Agents must balance the reward of nearby resources against the risk of entering or approaching hazardous regions.
+
+Hazard analysis now tracks exposure, not only deaths that occur inside the hazard zone. Agent logs include time spent in the hazard, accumulated hazard energy penalty, and hazard entries so delayed hazard effects can be inspected.
 
 ### Imperfect Sensing
 
@@ -254,6 +257,7 @@ python3 compare_validation_runs.py
 * v3.4 — Modular Architecture Refactor
 * v3.5 — Confidence-Aware Foraging (implemented)
 * v3.5.1 — Validation Interpretation Cleanup (implemented)
+* v3.5.2 — Hazard Exposure Analytics (implemented)
 * v3.6 — Agent Memory of Risk and Reward
 * v3.7 — Experiment Comparison Mode
 * v4.0 — Portfolio Release
@@ -325,6 +329,7 @@ Includes:
 * Agent log initialization.
 * Population-level logging.
 * Agent-level survival/death logging.
+* Hazard exposure and penalty telemetry.
 
 ### `visualization.py`
 
@@ -350,6 +355,7 @@ Includes:
 * Trait evolution plots.
 * Sensor noise plots.
 * Confidence-aware foraging plots.
+* Hazard exposure plots.
 
 ### `summarize_results.py`
 
@@ -362,6 +368,7 @@ Includes:
 * Lineage analysis.
 * Sensor noise analysis.
 * Confidence-aware foraging analysis.
+* Hazard exposure analysis.
 * Interpretation of experiment outcomes.
 
 ---

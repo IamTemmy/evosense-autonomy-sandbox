@@ -48,6 +48,9 @@ class SimulationEnvironment:
         self.frame_count = 0
         self.low_confidence_decisions = 0
         self.high_confidence_decisions = 0
+        self.total_hazard_exposure_steps = 0
+        self.total_hazard_energy_penalty = 0
+        self.total_hazard_entries = 0
         self.agents = []
         self.foods = []
 
@@ -59,6 +62,9 @@ class SimulationEnvironment:
         self.frame_count = 0
         self.low_confidence_decisions = 0
         self.high_confidence_decisions = 0
+        self.total_hazard_exposure_steps = 0
+        self.total_hazard_energy_penalty = 0
+        self.total_hazard_entries = 0
 
         initialize_simulation_log_file()
         initialize_agent_log_file()
@@ -89,6 +95,8 @@ class SimulationEnvironment:
             self.foods.pop()
 
     def get_average_stats(self):
+        total_agents_created = max(self.next_agent_id - 1, 1)
+
         if not self.agents:
             return {
                 "average_energy": 0,
@@ -102,13 +110,20 @@ class SimulationEnvironment:
                 "average_selected_target_confidence": 0,
                 "low_confidence_decisions": self.low_confidence_decisions,
                 "high_confidence_decisions": self.high_confidence_decisions,
-                "living_lineages": 0
+                "living_lineages": 0,
+                "total_hazard_exposure_steps": self.total_hazard_exposure_steps,
+                "average_hazard_exposure_steps": self.total_hazard_exposure_steps / total_agents_created,
+                "total_hazard_energy_penalty": self.total_hazard_energy_penalty,
+                "average_hazard_energy_penalty": self.total_hazard_energy_penalty / total_agents_created,
+                "total_hazard_entries": self.total_hazard_entries,
+                "agents_inside_hazard": 0
             }
 
         total_perception_confidence = sum(agent["perception_confidence_total"] for agent in self.agents)
         total_perceptions = sum(agent["perception_count"] for agent in self.agents)
         total_selected_confidence = sum(agent["selected_confidence_total"] for agent in self.agents)
         total_selected_targets = sum(agent["selected_target_count"] for agent in self.agents)
+        agents_inside_hazard = sum(1 for agent in self.agents if agent["currently_inside_hazard"])
 
         return {
             "average_energy": sum(agent["energy"] for agent in self.agents) / len(self.agents),
@@ -126,7 +141,13 @@ class SimulationEnvironment:
             ),
             "low_confidence_decisions": self.low_confidence_decisions,
             "high_confidence_decisions": self.high_confidence_decisions,
-            "living_lineages": len(set(agent["lineage_id"] for agent in self.agents))
+            "living_lineages": len(set(agent["lineage_id"] for agent in self.agents)),
+            "total_hazard_exposure_steps": self.total_hazard_exposure_steps,
+            "average_hazard_exposure_steps": self.total_hazard_exposure_steps / total_agents_created,
+            "total_hazard_energy_penalty": self.total_hazard_energy_penalty,
+            "average_hazard_energy_penalty": self.total_hazard_energy_penalty / total_agents_created,
+            "total_hazard_entries": self.total_hazard_entries,
+            "agents_inside_hazard": agents_inside_hazard
         }
 
     def get_lineage_stats(self):
@@ -164,11 +185,23 @@ class SimulationEnvironment:
 
     def update_agent(self, agent, newborn_agents):
         agent_position = (int(agent["x"]), int(agent["y"]))
+        inside_hazard = self.hazard_enabled and HAZARD_ZONE.collidepoint(agent_position)
 
-        if self.hazard_enabled and HAZARD_ZONE.collidepoint(agent_position):
+        if inside_hazard:
             agent["energy"] -= self.hazard_energy_loss_rate
+            agent["hazard_exposure_steps"] += 1
+            agent["total_hazard_energy_penalty"] += self.hazard_energy_loss_rate
+            self.total_hazard_exposure_steps += 1
+            self.total_hazard_energy_penalty += self.hazard_energy_loss_rate
+
+            if not agent["currently_inside_hazard"]:
+                agent["times_entered_hazard"] += 1
+                self.total_hazard_entries += 1
+
+            agent["currently_inside_hazard"] = True
         else:
             agent["energy"] -= agent["energy_loss_rate"]
+            agent["currently_inside_hazard"] = False
 
         if agent["energy"] <= 0:
             log_agent(self, agent, "died")

@@ -102,6 +102,21 @@ if (
     plt.savefig(f"{PLOTS_FOLDER}/confidence_decisions_plot.png")
     plt.close()
 
+if (
+    "total_hazard_exposure_steps" in data.columns
+    and "total_hazard_energy_penalty" in data.columns
+):
+    plt.figure(figsize=(10, 5))
+    plt.plot(data["time_seconds"], data["total_hazard_exposure_steps"], label="Cumulative Exposure Steps")
+    plt.plot(data["time_seconds"], data["total_hazard_energy_penalty"], label="Cumulative Energy Penalty")
+    plt.title(f"Hazard Exposure Over Time - Preset: {preset_name}")
+    plt.xlabel("Time (seconds)")
+    plt.ylabel("Cumulative Total")
+    plt.legend()
+    plt.grid(True)
+    plt.savefig(f"{PLOTS_FOLDER}/hazard_exposure_plot.png")
+    plt.close()
+
 print("Plots generated successfully.")
 print(f"Preset: {preset_name}")
 print(f"Saved in: {PLOTS_FOLDER}/")

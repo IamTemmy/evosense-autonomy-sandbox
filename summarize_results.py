@@ -48,6 +48,12 @@ def summarize_group(label, group):
     if "low_confidence_decisions" in group.columns:
         print(f"Avg Low-Confidence Decisions: {group['low_confidence_decisions'].mean():.2f}")
 
+    if "hazard_exposure_steps" in group.columns:
+        print(f"Avg Hazard Exposure Steps: {group['hazard_exposure_steps'].mean():.2f}")
+
+    if "total_hazard_energy_penalty" in group.columns:
+        print(f"Avg Hazard Energy Penalty: {group['total_hazard_energy_penalty'].mean():.2f}")
+
     print(f"Avg Food Eaten: {group['food_eaten'].mean():.2f}")
     print(f"Avg Birth Count: {group['birth_count'].mean():.2f}")
     print(f"Avg Final Energy: {group['final_energy'].mean():.2f}")
@@ -160,6 +166,12 @@ if "lineage_id" in agent_data.columns:
     if "average_selected_target_confidence" in agent_data.columns:
         aggregation_fields["avg_selected_confidence"] = ("average_selected_target_confidence", "mean")
 
+    if "hazard_exposure_steps" in agent_data.columns:
+        aggregation_fields["avg_hazard_exposure"] = ("hazard_exposure_steps", "mean")
+
+    if "total_hazard_energy_penalty" in agent_data.columns:
+        aggregation_fields["avg_hazard_penalty"] = ("total_hazard_energy_penalty", "mean")
+
     lineage_summary = (
         agent_data
         .groupby("lineage_id")
@@ -193,6 +205,12 @@ if "lineage_id" in agent_data.columns:
 
         if "avg_selected_confidence" in row:
             line += f", avg confidence {row['avg_selected_confidence']:.3f}"
+
+        if "avg_hazard_exposure" in row:
+            line += f", avg hazard exposure {row['avg_hazard_exposure']:.1f}"
+
+        if "avg_hazard_penalty" in row:
+            line += f", avg hazard penalty {row['avg_hazard_penalty']:.2f}"
 
         print(line)
 
@@ -263,10 +281,58 @@ if not dead_agents.empty and "died_in_hazard" in dead_agents.columns:
         print(f"Hazard Enabled Samples: {hazard_enabled_steps} of {len(simulation_data)}")
 
     print("Hazard impact note: zero deaths inside the hazard does not prove the hazard had no effect.")
-    print("Current logs track death location, but not hazard exposure time or accumulated hazard energy penalty.")
-    print("Future versions should track hazard exposure time to separate avoidance effects from direct hazard deaths.")
 else:
     print("No dead agents recorded or hazard data unavailable.")
+
+print_section("Hazard Exposure Analysis")
+
+if (
+    "hazard_exposure_steps" in agent_data.columns
+    and "total_hazard_energy_penalty" in agent_data.columns
+):
+    total_agent_exposure = agent_data["hazard_exposure_steps"].sum()
+    average_agent_exposure = agent_data["hazard_exposure_steps"].mean()
+    total_agent_penalty = agent_data["total_hazard_energy_penalty"].sum()
+    average_agent_penalty = agent_data["total_hazard_energy_penalty"].mean()
+
+    print(f"Total Agent Hazard Exposure Steps: {total_agent_exposure:.0f}")
+    print(f"Avg Hazard Exposure Steps per Logged Agent: {average_agent_exposure:.2f}")
+    print(f"Total Agent Hazard Energy Penalty: {total_agent_penalty:.2f}")
+    print(f"Avg Hazard Energy Penalty per Logged Agent: {average_agent_penalty:.2f}")
+
+    if "times_entered_hazard" in agent_data.columns:
+        print(f"Total Hazard Entries: {agent_data['times_entered_hazard'].sum():.0f}")
+        print(f"Avg Hazard Entries per Logged Agent: {agent_data['times_entered_hazard'].mean():.2f}")
+
+    if "total_hazard_exposure_steps" in simulation_data.columns:
+        print(f"Simulation Cumulative Exposure Steps: {simulation_data['total_hazard_exposure_steps'].iloc[-1]:.0f}")
+
+    if "total_hazard_energy_penalty" in simulation_data.columns:
+        print(f"Simulation Cumulative Energy Penalty: {simulation_data['total_hazard_energy_penalty'].iloc[-1]:.2f}")
+
+    if not survivors.empty and not dead_agents.empty:
+        survivor_hazard_exposure = survivors["hazard_exposure_steps"].mean()
+        dead_hazard_exposure = dead_agents["hazard_exposure_steps"].mean()
+        survivor_hazard_penalty = survivors["total_hazard_energy_penalty"].mean()
+        dead_hazard_penalty = dead_agents["total_hazard_energy_penalty"].mean()
+
+        print(f"Survivor Avg Exposure Steps: {survivor_hazard_exposure:.2f}")
+        print(f"Dead Agent Avg Exposure Steps: {dead_hazard_exposure:.2f}")
+        print(f"Survivor Avg Hazard Penalty: {survivor_hazard_penalty:.2f}")
+        print(f"Dead Agent Avg Hazard Penalty: {dead_hazard_penalty:.2f}")
+
+        if total_agent_exposure <= 0:
+            print("Agents largely avoided the hazard zone or the environment layout limited exposure.")
+        elif dead_hazard_exposure > survivor_hazard_exposure and dead_hazard_penalty > survivor_hazard_penalty:
+            print("Dead agents had higher hazard exposure and penalty, so hazard exposure may have contributed to mortality.")
+        else:
+            print("Survivors had similar or higher hazard exposure, so hazard exposure was not the dominant mortality factor in this run.")
+    elif total_agent_exposure <= 0:
+        print("Agents largely avoided the hazard zone or the environment layout limited exposure.")
+    else:
+        print("Not enough survivor/death contrast for hazard exposure comparison.")
+else:
+    print("Hazard exposure metrics unavailable. Run the latest main.py first.")
 
 print_section("Sensor Noise Analysis")
 
@@ -377,3 +443,19 @@ if not survivors.empty and not dead_agents.empty:
             print("Survivors selected lower-confidence targets on average, suggesting hunger, risk tolerance, or food layout outweighed confidence in this run.")
         else:
             print("Selected-target confidence was similar for survivors and dead agents, suggesting other traits or environmental pressure likely dominated survival outcomes.")
+
+    if (
+        "hazard_exposure_steps" in agent_data.columns
+        and "total_hazard_energy_penalty" in agent_data.columns
+    ):
+        survivor_exposure = survivors["hazard_exposure_steps"].mean()
+        dead_exposure = dead_agents["hazard_exposure_steps"].mean()
+        survivor_penalty = survivors["total_hazard_energy_penalty"].mean()
+        dead_penalty = dead_agents["total_hazard_energy_penalty"].mean()
+
+        if agent_data["hazard_exposure_steps"].sum() <= 0:
+            print("Hazard exposure was near zero, suggesting agents avoided the hazard zone or had little opportunity to enter it.")
+        elif dead_exposure > survivor_exposure and dead_penalty > survivor_penalty:
+            print("Dead agents accumulated more hazard exposure and hazard energy penalty, suggesting hazard exposure may have contributed to mortality.")
+        else:
+            print("Hazard exposure was similar or higher among survivors, suggesting it was not the dominant mortality factor in this run.")

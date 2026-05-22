@@ -102,6 +102,7 @@ def draw_stats(environment, screen, font):
         f"Sensor Noise: {stats_data['average_sensor_noise']:.2f}",
         f"Avg Confidence: {stats_data['average_selected_target_confidence']:.2f}",
         f"Low-Conf Rate: {low_confidence_rate:.0f}%",
+        f"Avg Hazard Exp: {stats_data['average_hazard_exposure_steps']:.1f}",
         "",
         "Top Lineages"
     ]
