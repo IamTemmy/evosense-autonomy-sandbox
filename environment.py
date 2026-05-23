@@ -8,6 +8,8 @@ from agents import (
     create_agent,
     normalize_vector,
     random_velocity,
+    record_food_memory,
+    record_hazard_memory,
 )
 from config import (
     AGENT_RADIUS,
@@ -116,13 +118,19 @@ class SimulationEnvironment:
                 "total_hazard_energy_penalty": self.total_hazard_energy_penalty,
                 "average_hazard_energy_penalty": self.total_hazard_energy_penalty / total_agents_created,
                 "total_hazard_entries": self.total_hazard_entries,
-                "agents_inside_hazard": 0
+                "agents_inside_hazard": 0,
+                "average_memory_influenced_decisions": 0,
+                "average_memory_reward_score": 0,
+                "average_memory_risk_score": 0
             }
 
         total_perception_confidence = sum(agent["perception_confidence_total"] for agent in self.agents)
         total_perceptions = sum(agent["perception_count"] for agent in self.agents)
         total_selected_confidence = sum(agent["selected_confidence_total"] for agent in self.agents)
         total_selected_targets = sum(agent["selected_target_count"] for agent in self.agents)
+        total_memory_decisions = sum(agent["memory_influenced_decisions"] for agent in self.agents)
+        total_memory_reward = sum(agent["memory_reward_score"] for agent in self.agents)
+        total_memory_risk = sum(agent["memory_risk_score"] for agent in self.agents)
         agents_inside_hazard = sum(1 for agent in self.agents if agent["currently_inside_hazard"])
 
         return {
@@ -147,7 +155,14 @@ class SimulationEnvironment:
             "total_hazard_energy_penalty": self.total_hazard_energy_penalty,
             "average_hazard_energy_penalty": self.total_hazard_energy_penalty / total_agents_created,
             "total_hazard_entries": self.total_hazard_entries,
-            "agents_inside_hazard": agents_inside_hazard
+            "agents_inside_hazard": agents_inside_hazard,
+            "average_memory_influenced_decisions": total_memory_decisions / len(self.agents),
+            "average_memory_reward_score": (
+                total_memory_reward / total_memory_decisions if total_memory_decisions else 0
+            ),
+            "average_memory_risk_score": (
+                total_memory_risk / total_memory_decisions if total_memory_decisions else 0
+            )
         }
 
     def get_lineage_stats(self):
@@ -197,6 +212,7 @@ class SimulationEnvironment:
             if not agent["currently_inside_hazard"]:
                 agent["times_entered_hazard"] += 1
                 self.total_hazard_entries += 1
+                record_hazard_memory(agent, agent["x"], agent["y"])
 
             agent["currently_inside_hazard"] = True
         else:
@@ -267,6 +283,7 @@ class SimulationEnvironment:
 
                 agent["food_eaten"] += 1
                 agent["energy"] += self.food_energy_gain
+                record_food_memory(agent, food["x"], food["y"])
 
     def reproduce_if_ready(self, agent, newborn_agents):
         if agent["energy"] >= self.reproduction_energy and len(self.agents) + len(newborn_agents) < MAX_AGENTS:

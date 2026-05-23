@@ -36,6 +36,9 @@ def initialize_simulation_log_file():
             "average_hazard_energy_penalty",
             "total_hazard_entries",
             "agents_inside_hazard",
+            "average_memory_influenced_decisions",
+            "average_memory_reward_score",
+            "average_memory_risk_score",
             "hazard_enabled"
         ])
 
@@ -73,7 +76,12 @@ def initialize_agent_log_file():
             "average_perception_confidence",
             "average_selected_target_confidence",
             "low_confidence_decisions",
-            "high_confidence_decisions"
+            "high_confidence_decisions",
+            "memory_influenced_decisions",
+            "average_memory_reward_score",
+            "average_memory_risk_score",
+            "food_memory_size",
+            "hazard_memory_size"
         ])
 
 
@@ -88,6 +96,16 @@ def log_agent(environment, agent, status):
     average_selected_target_confidence = (
         agent["selected_confidence_total"] / agent["selected_target_count"]
         if agent["selected_target_count"]
+        else 0
+    )
+    average_memory_reward_score = (
+        agent["memory_reward_score"] / agent["memory_influenced_decisions"]
+        if agent["memory_influenced_decisions"]
+        else 0
+    )
+    average_memory_risk_score = (
+        agent["memory_risk_score"] / agent["memory_influenced_decisions"]
+        if agent["memory_influenced_decisions"]
         else 0
     )
 
@@ -121,7 +139,12 @@ def log_agent(environment, agent, status):
             round(average_perception_confidence, 3),
             round(average_selected_target_confidence, 3),
             agent["low_confidence_decisions"],
-            agent["high_confidence_decisions"]
+            agent["high_confidence_decisions"],
+            agent["memory_influenced_decisions"],
+            round(average_memory_reward_score, 3),
+            round(average_memory_risk_score, 3),
+            len(agent["food_memory"]),
+            len(agent["hazard_memory"])
         ])
 
 
@@ -162,5 +185,8 @@ def log_simulation_data(environment):
             round(stats["average_hazard_energy_penalty"], 3),
             stats["total_hazard_entries"],
             stats["agents_inside_hazard"],
+            round(stats["average_memory_influenced_decisions"], 3),
+            round(stats["average_memory_reward_score"], 3),
+            round(stats["average_memory_risk_score"], 3),
             environment.hazard_enabled
         ])

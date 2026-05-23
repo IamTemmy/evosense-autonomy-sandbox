@@ -107,6 +107,7 @@ EvoSense should be understood as a bio-inspired autonomy sandbox, not a vehicle 
 * Sensor noise analysis.
 * Confidence-aware foraging analysis.
 * Hazard exposure analytics.
+* Memory-guided foraging analysis.
 * v3.5.1 validation comparison and more cautious confidence/hazard interpretation.
 * Plot generation.
 
@@ -131,6 +132,10 @@ Agents do not operate with perfect knowledge. Vision radius and sensor noise cre
 ### Confidence-Aware Foraging
 
 Agents estimate confidence for perceived food targets using distance, sensor noise, and hazard proximity. Food selection balances distance, confidence, hazard risk, risk tolerance, and an inherited uncertainty-tolerance trait.
+
+### Agent Memory of Risk and Reward
+
+Agents keep bounded recent memory of food locations where they succeeded and hazard locations where they were exposed. Food selection now includes a modest memory reward near recent successful food areas and a modest memory risk penalty near remembered hazardous areas.
 
 ### Inherited Traits
 
@@ -258,7 +263,7 @@ python3 compare_validation_runs.py
 * v3.5 — Confidence-Aware Foraging (implemented)
 * v3.5.1 — Validation Interpretation Cleanup (implemented)
 * v3.5.2 — Hazard Exposure Analytics (implemented)
-* v3.6 — Agent Memory of Risk and Reward
+* v3.6 — Agent Memory of Risk and Reward (implemented)
 * v3.7 — Experiment Comparison Mode
 * v4.0 — Portfolio Release
 
@@ -306,6 +311,7 @@ Includes:
 * Uncertainty tolerance.
 * Risk-aware food selection.
 * Confidence-aware food selection.
+* Memory-guided food selection.
 * Hazard avoidance movement.
 
 ### `environment.py`
@@ -330,6 +336,7 @@ Includes:
 * Population-level logging.
 * Agent-level survival/death logging.
 * Hazard exposure and penalty telemetry.
+* Memory-guided foraging telemetry.
 
 ### `visualization.py`
 
@@ -356,6 +363,7 @@ Includes:
 * Sensor noise plots.
 * Confidence-aware foraging plots.
 * Hazard exposure plots.
+* Memory-guided foraging plots.
 
 ### `summarize_results.py`
 

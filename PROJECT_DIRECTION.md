@@ -94,6 +94,7 @@ EvoSense simplifies those ideas into an interpretable simulation. Instead of mod
 - Confidence-aware foraging plots.
 - Hazard-death metrics.
 - Hazard exposure metrics.
+- Memory-guided foraging metrics.
 - Summary reports.
 - Modular architecture and documentation.
 
@@ -180,7 +181,7 @@ Implemented feature. The hazard zone now logs exposure steps, accumulated hazard
 
 ### v3.6 - Agent Memory of Risk and Reward
 
-Planned feature. Agents should begin using limited memory of past risk and reward outcomes to influence future movement and foraging decisions.
+Implemented feature. Agents use bounded recent memory of successful food locations and hazardous exposure locations as modest scoring factors when selecting future food targets.
 
 ### v3.7 - Experiment Comparison Mode
 

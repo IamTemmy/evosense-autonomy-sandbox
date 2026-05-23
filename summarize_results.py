@@ -3,6 +3,7 @@ import pandas as pd
 SIMULATION_LOG_FILE = "data/simulation_log.csv"
 AGENT_LOG_FILE = "data/agent_log.csv"
 MEANINGFUL_CONFIDENCE_DIFFERENCE = 0.02
+MEANINGFUL_MEMORY_DIFFERENCE = 0.02
 
 simulation_data = pd.read_csv(SIMULATION_LOG_FILE)
 agent_data = pd.read_csv(AGENT_LOG_FILE)
@@ -53,6 +54,15 @@ def summarize_group(label, group):
 
     if "total_hazard_energy_penalty" in group.columns:
         print(f"Avg Hazard Energy Penalty: {group['total_hazard_energy_penalty'].mean():.2f}")
+
+    if "memory_influenced_decisions" in group.columns:
+        print(f"Avg Memory-Influenced Decisions: {group['memory_influenced_decisions'].mean():.2f}")
+
+    if "average_memory_reward_score" in group.columns:
+        print(f"Avg Memory Reward Score: {group['average_memory_reward_score'].mean():.3f}")
+
+    if "average_memory_risk_score" in group.columns:
+        print(f"Avg Memory Risk Score: {group['average_memory_risk_score'].mean():.3f}")
 
     print(f"Avg Food Eaten: {group['food_eaten'].mean():.2f}")
     print(f"Avg Birth Count: {group['birth_count'].mean():.2f}")
@@ -138,6 +148,11 @@ if "average_selected_target_confidence" in simulation_data.columns:
     end_selected_confidence = simulation_data["average_selected_target_confidence"].iloc[-1]
     print(f"Avg Selected Target Confidence: {start_selected_confidence:.3f} → {end_selected_confidence:.3f}")
 
+if "average_memory_influenced_decisions" in simulation_data.columns:
+    start_memory_decisions = simulation_data["average_memory_influenced_decisions"].iloc[0]
+    end_memory_decisions = simulation_data["average_memory_influenced_decisions"].iloc[-1]
+    print(f"Avg Memory-Influenced Decisions: {start_memory_decisions:.2f} → {end_memory_decisions:.2f}")
+
 print_section("Lineages")
 print(f"Living Lineages: {start_lineages} → {end_lineages}")
 
@@ -171,6 +186,15 @@ if "lineage_id" in agent_data.columns:
 
     if "total_hazard_energy_penalty" in agent_data.columns:
         aggregation_fields["avg_hazard_penalty"] = ("total_hazard_energy_penalty", "mean")
+
+    if "memory_influenced_decisions" in agent_data.columns:
+        aggregation_fields["avg_memory_decisions"] = ("memory_influenced_decisions", "mean")
+
+    if "average_memory_reward_score" in agent_data.columns:
+        aggregation_fields["avg_memory_reward"] = ("average_memory_reward_score", "mean")
+
+    if "average_memory_risk_score" in agent_data.columns:
+        aggregation_fields["avg_memory_risk"] = ("average_memory_risk_score", "mean")
 
     lineage_summary = (
         agent_data
@@ -211,6 +235,9 @@ if "lineage_id" in agent_data.columns:
 
         if "avg_hazard_penalty" in row:
             line += f", avg hazard penalty {row['avg_hazard_penalty']:.2f}"
+
+        if "avg_memory_decisions" in row:
+            line += f", avg memory decisions {row['avg_memory_decisions']:.1f}"
 
         print(line)
 
@@ -264,6 +291,11 @@ if not survivors.empty and not dead_agents.empty:
         dead_confidence = dead_agents["average_selected_target_confidence"].mean()
         selected_confidence_difference = survivor_confidence - dead_confidence
         print(f"Selected Confidence Difference: survivors {survivor_confidence:.3f} vs dead {dead_confidence:.3f}")
+
+    if "memory_influenced_decisions" in agent_data.columns:
+        survivor_memory_decisions = survivors["memory_influenced_decisions"].mean()
+        dead_memory_decisions = dead_agents["memory_influenced_decisions"].mean()
+        print(f"Memory Decision Difference: survivors {survivor_memory_decisions:.2f} vs dead {dead_memory_decisions:.2f}")
 else:
     print("Not enough survivor/death contrast for comparison.")
 
@@ -333,6 +365,58 @@ if (
         print("Not enough survivor/death contrast for hazard exposure comparison.")
 else:
     print("Hazard exposure metrics unavailable. Run the latest main.py first.")
+
+print_section("Memory-Guided Foraging Analysis")
+
+if "memory_influenced_decisions" in agent_data.columns:
+    final_memory_decisions = (
+        simulation_data["average_memory_influenced_decisions"].iloc[-1]
+        if "average_memory_influenced_decisions" in simulation_data.columns
+        else agent_data["memory_influenced_decisions"].mean()
+    )
+    final_memory_reward = (
+        simulation_data["average_memory_reward_score"].iloc[-1]
+        if "average_memory_reward_score" in simulation_data.columns
+        else agent_data["average_memory_reward_score"].mean()
+    )
+    final_memory_risk = (
+        simulation_data["average_memory_risk_score"].iloc[-1]
+        if "average_memory_risk_score" in simulation_data.columns
+        else agent_data["average_memory_risk_score"].mean()
+    )
+
+    print(f"End Avg Memory-Influenced Decisions: {final_memory_decisions:.2f}")
+    print(f"End Avg Memory Reward Score: {final_memory_reward:.3f}")
+    print(f"End Avg Memory Risk Score: {final_memory_risk:.3f}")
+
+    if not survivors.empty and not dead_agents.empty:
+        survivor_memory_decisions = survivors["memory_influenced_decisions"].mean()
+        dead_memory_decisions = dead_agents["memory_influenced_decisions"].mean()
+        survivor_memory_reward = survivors["average_memory_reward_score"].mean()
+        dead_memory_reward = dead_agents["average_memory_reward_score"].mean()
+        survivor_memory_risk = survivors["average_memory_risk_score"].mean()
+        dead_memory_risk = dead_agents["average_memory_risk_score"].mean()
+
+        print(f"Survivor Avg Memory-Influenced Decisions: {survivor_memory_decisions:.2f}")
+        print(f"Dead Agent Avg Memory-Influenced Decisions: {dead_memory_decisions:.2f}")
+        print(f"Survivor Avg Memory Reward Score: {survivor_memory_reward:.3f}")
+        print(f"Dead Agent Avg Memory Reward Score: {dead_memory_reward:.3f}")
+        print(f"Survivor Avg Memory Risk Score: {survivor_memory_risk:.3f}")
+        print(f"Dead Agent Avg Memory Risk Score: {dead_memory_risk:.3f}")
+
+        reward_difference = survivor_memory_reward - dead_memory_reward
+        risk_difference = dead_memory_risk - survivor_memory_risk
+
+        if reward_difference >= MEANINGFUL_MEMORY_DIFFERENCE:
+            print("Survivors had higher reward-memory use, so memory may have supported successful foraging.")
+        elif risk_difference >= MEANINGFUL_MEMORY_DIFFERENCE:
+            print("Dead agents had higher risk-memory exposure, so risky remembered areas may have contributed.")
+        else:
+            print("Memory differences were small, so memory did not dominate in this run.")
+    else:
+        print("Not enough survivor/death contrast for memory comparison.")
+else:
+    print("Memory metrics unavailable. Run the latest main.py first.")
 
 print_section("Sensor Noise Analysis")
 

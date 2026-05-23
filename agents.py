@@ -9,6 +9,7 @@ from config import (
     HEIGHT,
     MAX_ENERGY_LOSS_RATE,
     MAX_POSITION_NOISE_PIXELS,
+    MAX_MEMORY_EVENTS,
     MAX_RISK_TOLERANCE,
     MAX_SENSOR_NOISE,
     MAX_SPEED,
@@ -20,6 +21,10 @@ from config import (
     MIN_SPEED,
     MIN_UNCERTAINTY_TOLERANCE,
     MIN_VISION_RADIUS,
+    MEMORY_DECAY_DISTANCE,
+    MEMORY_ENABLED,
+    MEMORY_REWARD_WEIGHT,
+    MEMORY_RISK_WEIGHT,
     MUTATION_RATE,
     STARTING_ENERGY,
     LOW_CONFIDENCE_THRESHOLD,
@@ -139,6 +144,56 @@ def record_food_perception(agent, confidence_values, selected_confidence):
         agent["high_confidence_decisions"] += 1
 
 
+def add_memory_event(agent, memory_key, x, y):
+    if not MEMORY_ENABLED:
+        return
+
+    agent[memory_key].append((x, y))
+
+    if len(agent[memory_key]) > MAX_MEMORY_EVENTS:
+        agent[memory_key].pop(0)
+
+
+def record_food_memory(agent, x, y):
+    add_memory_event(agent, "food_memory", x, y)
+
+
+def record_hazard_memory(agent, x, y):
+    add_memory_event(agent, "hazard_memory", x, y)
+
+
+def memory_proximity_score(memory_events, x, y):
+    if not MEMORY_ENABLED or not memory_events:
+        return 0
+
+    strongest_match = 0
+
+    for memory_x, memory_y in memory_events:
+        distance = math.hypot(x - memory_x, y - memory_y)
+
+        if distance >= MEMORY_DECAY_DISTANCE:
+            continue
+
+        strongest_match = max(strongest_match, 1 - (distance / MEMORY_DECAY_DISTANCE))
+
+    return strongest_match
+
+
+def compute_memory_scores(agent, x, y):
+    reward_bonus = memory_proximity_score(agent["food_memory"], x, y) * MEMORY_REWARD_WEIGHT
+    risk_penalty = memory_proximity_score(agent["hazard_memory"], x, y) * MEMORY_RISK_WEIGHT
+    return reward_bonus, risk_penalty
+
+
+def record_memory_decision(agent, reward_bonus, risk_penalty):
+    if reward_bonus <= 0 and risk_penalty <= 0:
+        return
+
+    agent["memory_influenced_decisions"] += 1
+    agent["memory_reward_score"] += reward_bonus
+    agent["memory_risk_score"] += risk_penalty
+
+
 def create_agent(environment, x=None, y=None, parent=None):
     if parent:
         speed = mutate(parent["speed"], MUTATION_RATE, MIN_SPEED, MAX_SPEED)
@@ -200,6 +255,11 @@ def create_agent(environment, x=None, y=None, parent=None):
         "total_hazard_energy_penalty": 0,
         "times_entered_hazard": 0,
         "currently_inside_hazard": False,
+        "food_memory": [],
+        "hazard_memory": [],
+        "memory_influenced_decisions": 0,
+        "memory_reward_score": 0,
+        "memory_risk_score": 0,
         "color": color,
         "birth_frame": environment.frame_count
     }
@@ -213,6 +273,8 @@ def choose_best_food(environment, agent):
     best_score = float("-inf")
     perceived_confidences = []
     selected_confidence = None
+    selected_memory_reward = 0
+    selected_memory_risk = 0
 
     for food in environment.foods:
         actual_distance = math.hypot(food["x"] - agent["x"], food["y"] - agent["y"])
@@ -239,22 +301,41 @@ def choose_best_food(environment, agent):
 
         energy_urgency = 1 - clamp(agent["energy"] / STARTING_ENERGY, 0, 1)
         hunger_bonus = energy_urgency * 0.4
+        memory_reward_bonus, memory_risk_penalty = compute_memory_scores(
+            agent,
+            perceived_x,
+            perceived_y
+        )
 
-        score = distance_score + confidence_reward + hunger_bonus - risk_penalty - uncertainty_penalty
+        score = (
+            distance_score
+            + confidence_reward
+            + hunger_bonus
+            + memory_reward_bonus
+            - risk_penalty
+            - uncertainty_penalty
+            - memory_risk_penalty
+        )
 
         if score > best_score:
             best_score = score
             selected_confidence = confidence
+            selected_memory_reward = memory_reward_bonus
+            selected_memory_risk = memory_risk_penalty
             best_food = {
                 "actual": food,
                 "perceived_x": perceived_x,
                 "perceived_y": perceived_y,
-                "confidence": confidence
+                "confidence": confidence,
+                "memory_reward_bonus": memory_reward_bonus,
+                "memory_risk_penalty": memory_risk_penalty
             }
 
     record_food_perception(agent, perceived_confidences, selected_confidence)
 
     if selected_confidence is not None:
+        record_memory_decision(agent, selected_memory_reward, selected_memory_risk)
+
         if selected_confidence < LOW_CONFIDENCE_THRESHOLD:
             environment.low_confidence_decisions += 1
         else:

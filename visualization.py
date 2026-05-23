@@ -103,6 +103,7 @@ def draw_stats(environment, screen, font):
         f"Avg Confidence: {stats_data['average_selected_target_confidence']:.2f}",
         f"Low-Conf Rate: {low_confidence_rate:.0f}%",
         f"Avg Hazard Exp: {stats_data['average_hazard_exposure_steps']:.1f}",
+        f"Avg Memory Use: {stats_data['average_memory_influenced_decisions']:.1f}",
         "",
         "Top Lineages"
     ]

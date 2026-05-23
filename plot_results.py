@@ -117,6 +117,21 @@ if (
     plt.savefig(f"{PLOTS_FOLDER}/hazard_exposure_plot.png")
     plt.close()
 
+if "average_memory_influenced_decisions" in data.columns:
+    plt.figure(figsize=(10, 5))
+    plt.plot(data["time_seconds"], data["average_memory_influenced_decisions"], label="Avg Memory Decisions")
+    if "average_memory_reward_score" in data.columns:
+        plt.plot(data["time_seconds"], data["average_memory_reward_score"], label="Avg Memory Reward Score")
+    if "average_memory_risk_score" in data.columns:
+        plt.plot(data["time_seconds"], data["average_memory_risk_score"], label="Avg Memory Risk Score")
+    plt.title(f"Memory-Guided Foraging Over Time - Preset: {preset_name}")
+    plt.xlabel("Time (seconds)")
+    plt.ylabel("Average Value")
+    plt.legend()
+    plt.grid(True)
+    plt.savefig(f"{PLOTS_FOLDER}/memory_foraging_plot.png")
+    plt.close()
+
 print("Plots generated successfully.")
 print(f"Preset: {preset_name}")
 print(f"Saved in: {PLOTS_FOLDER}/")
